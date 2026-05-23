@@ -5,9 +5,9 @@ import {
   Route,
   Navigate,
   useNavigate,
+  HashRouter,
 } from 'react-router-dom';
 
-import { HashRouter } from "react-router-dom";
 
 
 import supabase from './lib/supabaseClient';
