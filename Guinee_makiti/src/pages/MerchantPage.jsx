@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import supabase from '../lib/supabaseClient';
 
-export default function MerchantPage({ user }) {
+export default function MerchantPage({ user, onCreateBoutique }) {
   const [businesses, setBusinesses] = useState([]);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function MerchantPage({ user }) {
 
         <div className="bg-white p-4 rounded-xl border">
           <h3 className="font-semibold mb-2">Actions</h3>
-          <button className="bg-green-600 text-white px-4 py-2 rounded-2xl">Créer une boutique</button>
+          <button onClick={onCreateBoutique} className="bg-green-600 text-white px-4 py-2 rounded-2xl">Créer une boutique</button>
           <div className="mt-4 text-sm text-gray-600">CRUD articles et gestion de stock à implémenter ici.</div>
         </div>
       </div>

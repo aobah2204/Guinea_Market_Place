@@ -760,7 +760,7 @@ export default function GuineeMarketplaceApp() {
           />
           <Route
             path="/merchant"
-            element={<ProtectedRoute allowedRole="merchant"><MerchantPage /></ProtectedRoute>}
+            element={<ProtectedRoute allowedRole="merchant">{showMerchantSetup ? <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} setShowMerchantSetup={setShowMerchantSetup} /> : <MerchantPage onCreateBoutique={() => setShowMerchantSetup(true)} />}</ProtectedRoute>}
           />
           <Route
             path="/"
@@ -769,7 +769,7 @@ export default function GuineeMarketplaceApp() {
                 <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} setShowMerchantSetup={setShowMerchantSetup} />
               ) : isConnected ? (
                 currentRole === 'merchant' ? (
-                  <MerchantPage />
+                  <MerchantPage onCreateBoutique={() => setShowMerchantSetup(true)} />
                 ) : currentRole === 'customer' ? (
                   <ClientPage />
                 ) : (
