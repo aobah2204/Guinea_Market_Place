@@ -7,6 +7,8 @@ import {
   useNavigate,
 } from 'react-router-dom';
 
+import { HashRouter } from "react-router-dom";
+
 
 import supabase from './lib/supabaseClient';
 import ClientPage from './pages/ClientPage';
