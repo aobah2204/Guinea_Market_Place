@@ -550,7 +550,7 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
   );
 }
 
-function Hero() {
+function Hero({ onCreateBoutique }) {
   return (
     <section className="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
       <div>
@@ -561,7 +561,7 @@ function Hero() {
           Une super app nationale permettant aux commerçants, restaurants, services, hôpitaux et loisirs de créer leur présence digitale.
         </p>
         <div className="flex flex-wrap gap-4">
-          <button className="bg-green-600 text-white px-6 py-3 rounded-2xl text-lg">Créer ma boutique</button>
+          <button onClick={onCreateBoutique} className="bg-green-600 text-white px-6 py-3 rounded-2xl text-lg">Créer ma boutique</button>
           <button className="border border-green-600 text-green-700 px-6 py-3 rounded-2xl text-lg">Télécharger l'app</button>
         </div>
       </div>
@@ -763,18 +763,18 @@ export default function GuineeMarketplaceApp() {
           <Route
             path="/"
             element={
-              isConnected ? (
+              showMerchantSetup ? (
+                <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} setShowMerchantSetup={setShowMerchantSetup} />
+              ) : isConnected ? (
                 currentRole === 'merchant' ? (
                   <MerchantPage />
                 ) : currentRole === 'customer' ? (
                   <ClientPage />
                 ) : (
-                  <Hero />
+                  <Hero onCreateBoutique={() => setShowMerchantSetup(true)} />
                 )
-              ) : showMerchantSetup ? (
-                <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} />
               ) : (
-                <Hero />
+                <Hero onCreateBoutique={() => setShowMerchantSetup(true)} />
               )
             }
           />
