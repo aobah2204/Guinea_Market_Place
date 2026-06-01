@@ -96,7 +96,7 @@ function Header({ query, setQuery, search, setSearch, setAuthMode, setShowAuth, 
           </div>
         </div>
         
-        {/* Barre de recherche */}
+        {/* Barre de recherche 
         <div className="flex gap-2 mb-4 sm:mb-0">
           <input
             type="text"
@@ -107,16 +107,31 @@ function Header({ query, setQuery, search, setSearch, setAuthMode, setShowAuth, 
           />
           <button className="bg-green-600 text-white px-3 sm:px-5 py-2 rounded-2xl text-sm sm:text-base font-medium whitespace-nowrap">Rechercher</button>
         </div>
+          */}
 
         {/* Authentification - responsive */}
         <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mt-4 sm:mt-0">
           {isConnected ? (
+            
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
               <div className="font-semibold text-sm sm:text-base">Bienvenue {authForm.fullName}</div>
               <button onClick={async () => { await supabase.auth.signOut(); setIsConnected(false); setCurrentRole(null); setCurrentUserId(null); setShowMerchantSetup(false); }} className="bg-red-600 text-white px-3 sm:px-4 py-2 rounded-2xl text-sm sm:text-base w-full sm:w-auto">Déconnexion</button>
+            
+              <div className="flex gap-2 mb-4 sm:mb-0">
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Rechercher..."
+                  className="flex-1 px-3 sm:px-4 py-2 rounded-2xl border text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+                <button className="bg-green-600 text-white px-3 sm:px-5 py-2 rounded-2xl text-sm sm:text-base font-medium whitespace-nowrap">Rechercher</button>
+              </div>
             </div>
+
+            
           ) : (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">              
               <div className="font-light text-sm sm:text-base">Connectez-vous ou créez un compte</div>
               <button onClick={() => { setAuthMode('login'); setShowAuth(true); }} className="border px-3 sm:px-4 py-2 rounded-2xl text-sm sm:text-base w-full sm:w-auto">Connexion</button>
               <button onClick={() => { setAuthMode('register'); setShowAuth(true); }} className="bg-black text-white px-3 sm:px-4 py-2 rounded-2xl text-sm sm:text-base w-full sm:w-auto">Inscription</button>
@@ -637,7 +652,7 @@ function Hero({ onCreateBoutique, results }) {
         </div>
       </div>
 
-      {/* Résultats - fullwidth */}
+      {/* Résultats - fullwidth 
       <div className="relative">
         {results.length > 0 ? (
           <ul className="w-full bg-white border rounded-lg shadow-lg overflow-hidden">
@@ -655,6 +670,9 @@ function Hero({ onCreateBoutique, results }) {
           <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg text-center">Aucun résultat</div>
         )}
       </div>
+      */}
+
+
     </section>
   );
 }
