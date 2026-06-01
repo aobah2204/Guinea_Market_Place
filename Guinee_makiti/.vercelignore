@@ -6,7 +6,6 @@ yarn-error.log
 .env.local
 .env.*.local
 coverage
-dist
 build
 *.log
 .DS_Store
