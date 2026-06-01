@@ -15,6 +15,27 @@ export default function ClientPage() {
   useEffect(() => {
     const loadFilters = async () => {
       try {
+
+        {/*
+        if(categories.length === 0) {
+          const { data: catData, error: catError } = await supabase.from('businesses').select('category'); 
+          if (catError) {
+            console.error('Category load error:', catError);
+          } else {
+            setCategories(catData.map(c => c.category).filter(Boolean).sort());
+          }
+        }
+
+        if(cities.length === 0) {
+          const { data: cityData, error: cityError } = await supabase.from('businesses').select('city'); 
+          if (cityError) {
+            console.error('City load error:', cityError);
+          } else {
+            setCities(cityData.map(c => c.city).filter(Boolean).sort());
+          }
+        }
+        */}
+
         const { data: catData } = await supabase.from('businesses').select('category').not('category', 'is', null).limit(1000);
         const uniqCats = Array.from(new Set((catData || []).map((c) => c.category).filter(Boolean)));
         setCategories(uniqCats.sort());
@@ -22,6 +43,7 @@ export default function ClientPage() {
         const { data: cityData } = await supabase.from('businesses').select('city').not('city', 'is', null).limit(1000);
         const uniqCities = Array.from(new Set((cityData || []).map((c) => c.city).filter(Boolean)));
         setCities(uniqCities.sort());
+
       } catch (e) {
         console.error('Filter load error', e);
       }
@@ -32,11 +54,13 @@ export default function ClientPage() {
   useEffect(() => {
     const fetchResults = async () => {
       // if no query and no filters, clear
+      {/*
       if (!query && !categoryFilter && !cityFilter) {
         setResults([]);
         return;
       }
-
+      */}
+    
       setLoading(true);
 
       try {

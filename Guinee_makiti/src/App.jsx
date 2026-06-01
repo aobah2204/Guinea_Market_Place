@@ -77,7 +77,7 @@ async function findProfileById(id) {
   return { profile: null, table: null, role: null };
 }
 
-function Header({ search, setSearch, setAuthMode, setShowAuth, isConnected, setIsConnected, authForm, setCurrentRole, setCurrentUserId }) {
+function Header({ query, setQuery, search, setSearch, setAuthMode, setShowAuth, isConnected, setIsConnected, authForm, setCurrentRole, setCurrentUserId, setShowMerchantSetup }) {
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b shadow-sm">
@@ -98,8 +98,10 @@ function Header({ search, setSearch, setAuthMode, setShowAuth, isConnected, setI
         <div className="flex gap-3 w-full md:w-auto">
           <input
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            //value={search}
+            //onChange={(e) => setSearch(e.target.value)}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher produits, services, lieux..."
             className="flex-1 md:w-96 px-4 py-2 rounded-2xl border focus:outline-none focus:ring-2 focus:ring-green-500"
           />
@@ -107,28 +109,15 @@ function Header({ search, setSearch, setAuthMode, setShowAuth, isConnected, setI
         </div>
 
         {/* Affichage conditionnel du message de bienvenue ou d'invitation à se connecter */}
-        {/*
-        <div className="hidden md:flex gap-4">
-          {isConnected ? (
-            <div>
-              <span>Bienvenue {authForm.fullName}</span>
-            </div>
-          ) : (
-            <div>
-              <span>Connectez-vous pour accéder à votre compte</span>
-            </div>
-          )}
-        </div>  
-        */}
-
         <div className="flex items-center justify-center gap-2">
           {isConnected ? (
             <>
               <div className="font-semibold">Bienvenue {authForm.fullName}</div>
-              <button onClick={async () => { await supabase.auth.signOut(); setIsConnected(false); setCurrentRole(null); setCurrentUserId(null); }} className="bg-red-600 text-white px-4 py-2 rounded-2xl">Déconnexion</button>
+              <button onClick={async () => { await supabase.auth.signOut(); setIsConnected(false); setCurrentRole(null); setCurrentUserId(null); setShowMerchantSetup(false); }} className="bg-red-600 text-white px-4 py-2 rounded-2xl">Déconnexion</button>
             </>
           ) : (
             <>
+              <div className="font-light">Connecter vous ou créer un compte</div>
               <button onClick={() => { setAuthMode('login'); setShowAuth(true); }} className="border px-4 py-2 rounded-2xl">Connexion</button>
               <button onClick={() => { setAuthMode('register'); setShowAuth(true); }} className="bg-black text-white px-4 py-2 rounded-2xl">Inscription</button>
             </>
@@ -226,6 +215,8 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           if (insertError) {
             throw insertError;
           }
+          
+          console.log('New role profile created for existing user:', authForm.role, 'user:', existingUser.id);
 
           setShowAuth(false);
           setAuthMode(null);
@@ -264,6 +255,10 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
         }
 
         const profileTable = authForm.role === 'merchant' ? MERCHANT_TABLE : CUSTOMER_TABLES[0];
+        console.log('=== PROFILE CREATION ===');
+        console.log('Table:', profileTable);
+        console.log('User ID:', data.user.id);
+        
         const { error: profileError } = await supabase.from(profileTable).upsert([
           {
             id: data.user.id,
@@ -274,22 +269,28 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           },
         ]);
 
+        if (profileError) {
+          console.error('Profile upsert error:', profileError);
+          throw new Error('Erreur lors de la création du profil: ' + profileError.message);
+        }
+
+        console.log('Profile upsert succeeded, now verifying...');
+        
+        // Verify profile was created
+        const { data: verifyProfile, error: verifyError } = await supabase.from(profileTable).select('*').eq('id', data.user.id).maybeSingle();
+        console.log('Verification result - Data:', verifyProfile);
+        console.log('Verification result - Error:', verifyError);
+        
+        if (!verifyProfile) {
+          console.error('Profile not found after creation!', verifyError);
+          throw new Error('Le profil n\'a pas pu être créé. Vérifiez la table ' + profileTable + ' dans Supabase.');
+        }
+        console.log('Profile verified:', verifyProfile.id, verifyProfile.email);
+
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-
-        console.log('Auto login after signup:', signInData, signInError);
-
-        if (profileError) {
-          console.error('Users table error:', profileError);
-        }
-
-        if (authForm.role === 'merchant') {
-          setShowAuth(false);
-          setAuthMode(null);
-          setShowMerchantSetup(true);
-        }
 
         if (signInError) {
           setSuccessMessage('Compte créé. Vérifiez votre email puis connectez-vous après confirmation.');
@@ -300,7 +301,13 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           setIsConnected(true);
           setCurrentRole(authForm.role);
           setCurrentUserId(data.user.id);
-          navigate(authForm.role === 'merchant' ? '/merchant' : '/client');
+          
+          if (authForm.role === 'merchant') {
+            setShowMerchantSetup(true);
+            //navigate('/merchant');
+          } else {
+            navigate('/client');
+          }
         }
         
         return;
@@ -350,7 +357,14 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
         }
 
         // Vérifier l'existence de l'utilisateur dans la table users selon l'email ET le rôle choisi
+        console.log('=== LOGIN DEBUG ===');
+        console.log('Email:', email);
+        console.log('Role:', authForm.role);
+        
         const { profile: userRecord, table: userTable, role: userRole } = await findProfileByEmailAndRole(email, authForm.role);
+
+        console.log('Profile found:', userRecord?.id, userRecord?.email);
+        console.log('Role found:', userRole);
 
         if (!userRecord) {
           await supabase.auth.signOut();
@@ -374,10 +388,16 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           role: userRole || prev.role,
         }));
         // set current role and user id
+        console.log('=== LOGIN COMPLETE ===');
+        console.log('Setting currentRole to:', userRole);
+        console.log('Setting currentUserId to:', userRecord.id);
+        console.log('Session auth user ID:', data.session?.user?.id);
+        
         setCurrentRole(userRole);
         setCurrentUserId(userRecord.id);
         setSuccessMessage('Connexion réussie');
         setIsConnected(true);
+        console.log('About to navigate to:', userRole === 'merchant' ? '/merchant' : '/client');
         navigate(userRole === 'merchant' ? '/merchant' : '/client');
       }
     } catch (error) {
@@ -447,7 +467,7 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
   );
 }
 
-function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerchantSetup }) {
+function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerchantSetup, currentUserId }) {
   const navigate = useNavigate();
   const [shopForm, setShopForm] = useState({
     business_name: '',
@@ -455,6 +475,7 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
     address: '',
     city: '',
     phone: '',
+    whatsapp: '',
     description: '',
   });
 
@@ -466,20 +487,46 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
     e.preventDefault();
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      // Prefer the `currentUserId` passed from parent; fallback to auth session if missing
+      let userId = currentUserId;
+      if (!userId) {
+        const { data } = await supabase.auth.getSession();
+        userId = data?.session?.user?.id;
+      }
 
-      if (!user) throw new Error('Utilisateur non connecté');
+      if (!userId) throw new Error('Utilisateur non connecté. Veuillez vous reconnecter.');
 
-      const { error } = await supabase.from('businesses').insert([
-        {
-          owner_id: user.id,
+      // Verify merchant profile exists
+      console.log('=== SHOP CREATION DEBUG ===');
+      console.log('Checking merchant profile for ID:', userId);
+      console.log('Prop currentUserId:', currentUserId);
+      
+      const { data: merchantProfile, error: profileError } = await supabase.from('users_merchant').select('*').eq('id', userId).maybeSingle();
+      
+      console.log('Query result - Data:', merchantProfile);
+      console.log('Query result - Error:', profileError);
+      
+      if (profileError) {
+        console.error('Error checking profile:', profileError);
+        throw new Error('Erreur lors de la vérification du profil: ' + profileError.message);
+      }
+      
+      if (!merchantProfile) {
+        console.error('No merchant profile found for ID:', userId);
+        console.error('This could be a RLS policy issue. Check Supabase > users_merchant table RLS policies.');
+        throw new Error('Aucun profil commerçant trouvé. Assurez-vous d\'avoir créé un compte commerçant et d\'être connecté.');
+      }
+      
+      console.log('Merchant profile found:', merchantProfile.id, merchantProfile.email);
+
+      const { error } = await supabase.from('businesses').insert([{
+          owner_id: userId,
           business_name: shopForm.business_name,
           category: shopForm.category,
           address: shopForm.address,
           city: shopForm.city,
           phone: shopForm.phone,
+          whatsapp: shopForm.whatsapp,
           description: shopForm.description,
           country: 'Guinée',
         },
@@ -495,6 +542,7 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
         address: '',
         city: '',
         phone: '',
+        whatsapp: '',
         description: '',
       });
 
@@ -512,6 +560,7 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
       address: '',
       city: '',
       phone: '',
+      whatsapp: '',
       description: '',
     });
     setShowMerchantSetup(false);
@@ -536,7 +585,8 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
           </select>
           <input name="address" value={shopForm.address} onChange={handleShopChange} type="text" placeholder="Adresse" className="w-full border rounded-2xl px-4 py-3" />
           <input name="city" value={shopForm.city} onChange={handleShopChange} type="text" placeholder="Ville" className="w-full border rounded-2xl px-4 py-3" />
-          <input name="phone" value={shopForm.phone} onChange={handleShopChange} type="tel" placeholder="WhatsApp / Téléphone" className="w-full border rounded-2xl px-4 py-3" />
+          <input name="phone" value={shopForm.phone} onChange={handleShopChange} type="tel" placeholder="Téléphone" className="w-full border rounded-2xl px-4 py-3" />
+          <input name="whatsapp" value={shopForm.whatsapp} onChange={handleShopChange} type="tel" placeholder="WhatsApp" className="w-full border rounded-2xl px-4 py-3" />
           <textarea name="description" value={shopForm.description} onChange={handleShopChange} placeholder="Description de votre activité" className="w-full border rounded-2xl px-4 py-3 min-h-[120px]" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button type="submit" className="w-full bg-green-600 text-white py-3 rounded-2xl font-bold text-lg">
@@ -552,7 +602,7 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
   );
 }
 
-function Hero({ onCreateBoutique }) {
+function Hero({ onCreateBoutique, results }) {
   return (
     <section className="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
       <div>
@@ -562,17 +612,40 @@ function Hero({ onCreateBoutique }) {
         <p className="text-lg text-gray-700 mb-8">
           Une super app nationale permettant aux commerçants, restaurants, services, hôpitaux et loisirs de créer leur présence digitale.
         </p>
+        {/*
         <div className="flex flex-wrap gap-4">
           <button onClick={onCreateBoutique} className="bg-green-600 text-white px-6 py-3 rounded-2xl text-lg">Créer ma boutique</button>
           <button className="border border-green-600 text-green-700 px-6 py-3 rounded-2xl text-lg">Télécharger l'app</button>
         </div>
+        */}
       </div>
       <div className="bg-white rounded-3xl shadow-2xl p-8 border">
         <div className="aspect-video rounded-2xl bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 flex flex-col items-center justify-center text-white">
-          <div className="text-2xl font-bold">Google Maps / OpenStreetMap</div>
-          <div className="text-sm mt-2">Recherche géolocalisée en temps réel</div>
+          <img
+              src="https://png.pngtree.com/png-clipart/20230802/original/pngtree-guinea-round-button-clip-art-black-shiny-vector-picture-image_9332151.png"
+              alt="Guinée Connect"
+              className="w-50 h-50 object-contain rounded-full shadow-md "
+            />           
         </div>
       </div>
+
+      <div className="relative max-w-3xl">
+        {results.length > 0 ? (
+          <ul className="absolute z-50 w-full bg-white border rounded-md mt-2 max-h-96 overflow-auto shadow-lg">
+            {results.map((r) => (
+              <li key={r.id} className="p-3 hover:bg-gray-50 border-b">
+                <div className="font-semibold">{r.business_name} <span className="text-sm font-normal text-gray-500">· {r.category}</span></div>
+                <div className="text-sm text-gray-600">{r.city} — {r.address}</div>
+                <div className="text-sm text-gray-700 mt-1">{r.description}</div>
+                <div className="text-sm text-gray-500 mt-1">Tel: {r.phone}</div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="text-sm text-gray-600">Aucun résultat</div>
+        )}
+      </div>
+
     </section>
   );
 }
@@ -592,10 +665,15 @@ export default function GuineeMarketplaceApp() {
   const [accessMessage, setAccessMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoadingSession, setIsLoadingSession] = useState(true);
 
   const clearAccessMessage = () => setAccessMessage('');
   const clearSuccessMessage = () => setSuccessMessage('');
   const clearErrorMessage = () => setErrorMessage('');
+  const [query, setQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+  const [results, setResults] = useState([]);
 
   // Auto-close messages after 5 seconds
   useEffect(() => {
@@ -619,7 +697,64 @@ export default function GuineeMarketplaceApp() {
     }
   }, [errorMessage]);
 
+  
+  useEffect(() => {
+    const fetchResults = async () => {
+      // if no query and no filters, clear
+      {/*
+      if (!query && !categoryFilter && !cityFilter) {
+        setResults([]);
+        return;
+      }
+      */}
+    
+      setLoading(true);
+
+      try {
+        let sb = supabase
+          .from('businesses')
+          .select('id, business_name, category, city, address, phone, description')
+          .order('business_name', { ascending: true })
+          .limit(50);
+
+        if (query) {
+          const q = query.replace(/%/g, '\\%');
+          const orStr = `business_name.ilike.%${q}%,category.ilike.%${q}%,city.ilike.%${q}%,address.ilike.%${q}%`;
+          sb = sb.or(orStr);
+        }
+
+        if (categoryFilter) sb = sb.eq('category', categoryFilter);
+        if (cityFilter) sb = sb.eq('city', cityFilter);
+
+        const { data, error } = await sb;
+
+        if (error) {
+          console.error('Search error:', error);
+          setResults([]);
+        } else {
+          setResults(data || []);
+        }
+      } catch (e) {
+        console.error(e);
+        setResults([]);
+      }
+
+      setLoading(false);
+    };
+
+    const t = setTimeout(fetchResults, 250);
+    return () => clearTimeout(t);
+  }, [query, categoryFilter, cityFilter]);
+
   function ProtectedRoute({ allowedRole, children }) {
+    if (isLoadingSession) {
+      return (
+        <div className="max-w-7xl mx-auto px-6 py-16 flex items-center justify-center min-h-screen">
+          <div className="text-center text-gray-700">Vérification de la session en cours...</div>
+        </div>
+      );
+    }
+
     if (!isConnected) {
       setAccessMessage('Veuillez vous connecter pour accéder à cette page.');
       return <Navigate to="/" replace />;
@@ -637,6 +772,8 @@ export default function GuineeMarketplaceApp() {
       const { data } = await supabase.auth.getSession();
       const session = data?.session;
 
+      console.log('Restoring session:', session?.user?.id);
+
       if (session?.user) {
         setIsConnected(true);
         setAuthForm((prev) => ({
@@ -646,18 +783,30 @@ export default function GuineeMarketplaceApp() {
         }));
         setCurrentUserId(session.user.id);
 
-        // try load role from merchant/customer profile tables
-        try {
-          const { profile } = await findProfileById(session.user.id);
-          if (profile?.role) {
-            setCurrentRole(profile.role);
-            setAuthForm((prev) => ({ ...prev, fullName: profile.full_name || prev.fullName, role: profile.role }));
+        // derive role from session metadata first (avoids RLS read issues), fallback to profile lookup
+        const metaRole = session.user.user_metadata?.role;
+        if (metaRole) {
+          setCurrentRole(metaRole);
+          setAuthForm((prev) => ({ ...prev, role: metaRole }));
+        } else {
+          try {
+            const { profile, role } = await findProfileById(session.user.id);
+            console.log('Profile found:', profile?.id, 'role:', role);
+            if (role || profile?.role) {
+              setCurrentRole(role || profile.role);
+              setAuthForm((prev) => ({ ...prev, fullName: profile?.full_name || prev.fullName, role: role || profile.role }));
+            } else {
+              console.warn('No profile role found');
+            }
+          } catch (e) {
+            console.error('Error loading profile on restore', e);
           }
-        } catch (e) {
-          console.error('Error loading profile on restore', e);
         }
         setShowAuth(false);
+      } else {
+        console.log('No session found');
       }
+      setIsLoadingSession(false);
     };
 
     restoreSession();
@@ -667,9 +816,14 @@ export default function GuineeMarketplaceApp() {
         setIsConnected(false);
         setCurrentRole(null);
         setCurrentUserId(null);
+        setShowMerchantSetup(false);
       }
 
       if (session?.user) {
+        console.log('=== AUTH STATE CHANGE (not logout) ===');
+        console.log('Event:', event);
+        console.log('Session user ID:', session.user.id);
+        
         setIsConnected(true);
         setAuthForm((prev) => ({
           ...prev,
@@ -677,15 +831,27 @@ export default function GuineeMarketplaceApp() {
           fullName: session.user.user_metadata?.full_name || prev.fullName,
         }));
 
-        // update role when auth state changes
+        // update role when auth state changes - prefer metadata then fallback to profile lookup
         (async () => {
           try {
-            const { profile } = await findProfileById(session.user.id);
-            if (profile?.role) {
-              setCurrentRole(profile.role);
-              setAuthForm((prev) => ({ ...prev, fullName: profile.full_name || prev.fullName, role: profile.role }));
+            const metaRole = session.user.user_metadata?.role;
+            if (metaRole) {
+              setCurrentRole(metaRole);
+              setAuthForm((prev) => ({ ...prev, role: metaRole }));
+              setCurrentUserId(session.user.id);
+              console.log('Set role from metadata:', metaRole);
+              return;
             }
-            setCurrentUserId(session.user.id);
+
+            const { profile, role } = await findProfileById(session.user.id);
+            if (role || profile?.role) {
+              setCurrentRole(role || profile.role);
+              setAuthForm((prev) => ({ ...prev, fullName: profile?.full_name || prev.fullName, role: role || profile.role }));
+              console.log('Found profile, setting currentUserId to profile ID:', profile.id);
+              setCurrentUserId(profile.id);
+            } else {
+              console.warn('No profile found for auth user:', session.user.id);
+            }
           } catch (e) {
             console.error('Error loading profile on auth change', e);
           }
@@ -701,7 +867,7 @@ export default function GuineeMarketplaceApp() {
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-yellow-50 text-gray-900">
-        <Header search={search} setSearch={setSearch} setAuthMode={setAuthMode} setShowAuth={setShowAuth} isConnected={isConnected} setIsConnected={setIsConnected} authForm={authForm} setCurrentRole={setCurrentRole} setCurrentUserId={setCurrentUserId} />
+        <Header query={query} setQuery={setQuery} search={search} setSearch={setSearch} setAuthMode={setAuthMode} setShowAuth={setShowAuth} isConnected={isConnected} setIsConnected={setIsConnected} authForm={authForm} setCurrentRole={setCurrentRole} setCurrentUserId={setCurrentUserId} setShowMerchantSetup={setShowMerchantSetup} setResults={setResults} />
 
         {showAuth && (
           <AuthSection
@@ -760,28 +926,34 @@ export default function GuineeMarketplaceApp() {
           />
           <Route
             path="/merchant"
-            element={<ProtectedRoute allowedRole="merchant">{showMerchantSetup ? <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} setShowMerchantSetup={setShowMerchantSetup} /> : <MerchantPage onCreateBoutique={() => setShowMerchantSetup(true)} />}</ProtectedRoute>}
+            element={<ProtectedRoute allowedRole="merchant">{showMerchantSetup ? <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} setShowMerchantSetup={setShowMerchantSetup} currentUserId={currentUserId} /> : <MerchantPage onCreateBoutique={() => setShowMerchantSetup(true)} currentUserId={currentUserId} />}</ProtectedRoute>}
           />
           <Route
             path="/"
             element={
-              showMerchantSetup ? (
-                <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} setShowMerchantSetup={setShowMerchantSetup} />
+              isLoadingSession ? (
+                <div className="max-w-7xl mx-auto px-6 py-16 flex items-center justify-center min-h-screen">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold mb-4">Chargement...</div>
+                  </div>
+                </div>
+              ) : showMerchantSetup ? (
+                <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} setShowMerchantSetup={setShowMerchantSetup} currentUserId={currentUserId} />
               ) : isConnected ? (
                 currentRole === 'merchant' ? (
-                  <MerchantPage onCreateBoutique={() => setShowMerchantSetup(true)} />
-                ) : currentRole === 'customer' ? (
-                  <ClientPage />
+                  <MerchantPage onCreateBoutique={() => setShowMerchantSetup(true)} currentUserId={currentUserId} />
                 ) : (
-                  <Hero onCreateBoutique={() => setShowMerchantSetup(true)} />
-                )
+                  <ClientPage />
+                ) 
               ) : (
-                <Hero onCreateBoutique={() => setShowMerchantSetup(true)} />
+                <Hero onCreateBoutique={() => setShowMerchantSetup(true)} results={results} query={query} />
               )
             }
           />
         </Routes>
 
+        
+        {/*
         <section className="max-w-7xl mx-auto px-6 py-12">
           <div className="bg-white rounded-3xl border p-8 shadow-sm">
             <h3 className="text-3xl font-bold mb-4">Progression projet</h3>
@@ -795,7 +967,17 @@ export default function GuineeMarketplaceApp() {
             </div>
           </div>
         </section>
+        */}
+
+        
       </div>
+
+      <footer className="bg-green-700 text-white py-6 mt-12">
+          <div className="max-w-7xl mx-auto px-6 text-center">
+            &copy; {new Date().getFullYear()} Guinée Connect. Tous droits réservés.
+          </div>
+      </footer>
+
     </Router>
   );
 }
