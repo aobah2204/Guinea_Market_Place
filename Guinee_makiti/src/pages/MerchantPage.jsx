@@ -215,78 +215,99 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-12">
-      <h2 className="text-2xl font-bold mb-4">Tableau Commerçant</h2>
-      <p className="mb-6 text-gray-600">Créer et gérer vos boutiques et articles depuis ce tableau.</p>
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-2">Tableau Commerçant</h2>
+      <p className="mb-6 sm:mb-8 text-gray-600 text-sm sm:text-base">Créer et gérer vos boutiques et articles depuis ce tableau.</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-xl border">
-          <h3 className="font-semibold mb-2">Vos boutiques</h3>
-          <ul className="space-y-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Colonne boutiques */}
+        <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-xl border">
+          <h3 className="font-semibold text-lg mb-4">Vos boutiques</h3>
+          <ul className="space-y-3 sm:space-y-4">
             {businesses.map((b) => (
-              <li key={b.id} className="p-3 border rounded-md">
+              <li key={b.id} className="p-4 border rounded-lg hover:bg-gray-50 transition">
                 {editingId === b.id ? (
-                  <form onSubmit={submitEdit} className="space-y-2">
-                    <input className="w-full border rounded px-2 py-1" value={editForm.business_name} onChange={(e) => setEditForm(prev => ({ ...prev, business_name: e.target.value }))} />
-                    <div className="flex gap-2">
-                      <input className="flex-1 border rounded px-2 py-1" value={editForm.city} onChange={(e) => setEditForm(prev => ({ ...prev, city: e.target.value }))} />
-                      <input className="flex-1 border rounded px-2 py-1" value={editForm.category} onChange={(e) => setEditForm(prev => ({ ...prev, category: e.target.value }))} />
+                  <form onSubmit={submitEdit} className="space-y-3">
+                    <input 
+                      className="w-full border rounded px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                      value={editForm.business_name} 
+                      onChange={(e) => setEditForm(prev => ({ ...prev, business_name: e.target.value }))} 
+                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                      <input 
+                        className="border rounded px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        value={editForm.city} 
+                        onChange={(e) => setEditForm(prev => ({ ...prev, city: e.target.value }))} 
+                        placeholder="Ville"
+                      />
+                      <input 
+                        className="border rounded px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        value={editForm.category} 
+                        onChange={(e) => setEditForm(prev => ({ ...prev, category: e.target.value }))} 
+                        placeholder="Catégorie"
+                      />
                     </div>
-                    <textarea className="w-full border rounded px-2 py-1" value={editForm.description} onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))} />
+                    <textarea 
+                      className="w-full border rounded px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]" 
+                      value={editForm.description} 
+                      onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))} 
+                    />
                     <div className="flex gap-2">
-                      <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded">Enregistrer</button>
-                      <button type="button" onClick={cancelEdit} className="border px-3 py-1 rounded">Annuler</button>
+                      <button type="submit" className="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-sm sm:text-base font-medium hover:bg-blue-700 transition">Enregistrer</button>
+                      <button type="button" onClick={cancelEdit} className="flex-1 border px-3 py-2 rounded text-sm sm:text-base hover:bg-gray-100 transition">Annuler</button>
                     </div>
                   </form>
                 ) : (
                   <div>
-                    <div className="font-semibold">{b.business_name}</div>
-                    <div className="text-sm text-gray-600">{b.city} — {b.category}</div>
+                    <div className="font-semibold text-base">{b.business_name}</div>
+                    <div className="text-xs sm:text-sm text-gray-600 mt-1">{b.city} — {b.category}</div>
 
-                    <div className="mt-3">
-                      <div className="text-sm font-medium mb-2">Galerie ({(businessPhotos[b.id] || []).length}/6)</div>
-                      <div className="grid grid-cols-3 gap-2">
+                    {/* Galerie photos - responsive */}
+                    <div className="mt-4">
+                      <div className="text-sm font-medium mb-3">Galerie ({(businessPhotos[b.id] || []).length}/6)</div>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                         {(businessPhotos[b.id] || []).map((photo) => (
-                          <div key={photo.id} className="relative rounded overflow-hidden border">
-                            <img src={photo.photo_url} alt="Photo boutique" className="h-20 w-full object-cover" />
+                          <div key={photo.id} className="relative rounded overflow-hidden border aspect-square">
+                            <img src={photo.photo_url} alt="Photo boutique" className="w-full h-full object-cover" />
                             {currentUserId && b.owner_id === currentUserId && (
-                              <button onClick={() => deletePhoto(photo.id)} className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded">x</button>
+                              <button onClick={() => deletePhoto(photo.id)} className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700">×</button>
                             )}
                           </div>
                         ))}
                         {!(businessPhotos[b.id] || []).length && (
-                          <div className="col-span-3 text-sm text-gray-500 italic">Aucune photo ajoutée.</div>
+                          <div className="col-span-3 sm:col-span-4 text-xs sm:text-sm text-gray-500 italic text-center py-4">Aucune photo</div>
                         )}
                       </div>
                     </div>
 
                     {currentUserId && b.owner_id === currentUserId && (
-                      <div className="mt-3">
-                        <button onClick={() => startPhotoUpload(b)} className="border px-3 py-1 rounded">Ajouter une photo</button>
+                      <div className="mt-4">
+                        <button onClick={() => startPhotoUpload(b)} className="border px-3 sm:px-4 py-2 rounded text-sm sm:text-base hover:bg-gray-100 transition">Ajouter une photo</button>
                       </div>
                     )}
 
                     {photoModeOpen === b.id && (
-                      <form onSubmit={submitPhoto} className="mt-3 space-y-2 border p-3 rounded bg-slate-50">
-                        <div className="text-sm text-gray-700">Chargez un fichier ou collez un lien d'image</div>
-                        <input type="url" name="url" placeholder="URL de l'image" value={photoForm.url} onChange={handlePhotoFormChange} className="w-full border rounded px-2 py-1" />
-                        <input type="file" name="file" accept="image/*" onChange={handlePhotoFormChange} className="w-full" />
+                      <form onSubmit={submitPhoto} className="mt-4 space-y-3 border p-4 rounded bg-slate-50">
+                        <div className="text-xs sm:text-sm text-gray-700">Chargez un fichier ou collez un lien d'image</div>
+                        <input type="url" name="url" placeholder="URL de l'image" value={photoForm.url} onChange={handlePhotoFormChange} className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                        <input type="file" name="file" accept="image/*" onChange={handlePhotoFormChange} className="w-full text-sm" />
                         <div className="flex gap-2">
-                          <button type="submit" className="bg-green-600 text-white px-3 py-1 rounded">Ajouter</button>
-                          <button type="button" onClick={() => setPhotoModeOpen(null)} className="border px-3 py-1 rounded">Annuler</button>
+                          <button type="submit" className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-green-700 transition">Ajouter</button>
+                          <button type="button" onClick={() => setPhotoModeOpen(null)} className="flex-1 border px-3 py-2 rounded text-sm hover:bg-gray-100 transition">Annuler</button>
                         </div>
                         <div className="text-xs text-gray-500">Si votre bucket de stockage Supabase n'est pas configuré, ajoutez un lien d'image externe.</div>
                       </form>
                     )}
 
-                    <div className="mt-2 flex gap-2">
+                    {/* Actions - responsive */}
+                    <div className="mt-4 flex flex-col sm:flex-row gap-2">
                       {currentUserId && b.owner_id === currentUserId ? (
                         <>
-                          <button onClick={() => startEdit(b)} className="border px-3 py-1 rounded">Modifier</button>
-                          <button onClick={() => deleteBusiness(b.id, b.owner_id)} className="bg-red-600 text-white px-3 py-1 rounded">Supprimer</button>
+                          <button onClick={() => startEdit(b)} className="flex-1 border px-3 py-2 rounded text-sm sm:text-base hover:bg-gray-100 transition">Modifier</button>
+                          <button onClick={() => deleteBusiness(b.id, b.owner_id)} className="flex-1 bg-red-600 text-white px-3 py-2 rounded text-sm sm:text-base hover:bg-red-700 transition">Supprimer</button>
                         </>
                       ) : (
-                        <div className="text-xs text-gray-500 italic">Vous n'êtes pas le propriétaire</div>
+                        <div className="text-xs sm:text-sm text-gray-500 italic">Vous n'êtes pas le propriétaire</div>
                       )}
                     </div>
                   </div>
@@ -296,10 +317,14 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
           </ul>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border">
-          <h3 className="font-semibold mb-2">Actions</h3>
-          <button onClick={onCreateBoutique} className="bg-green-600 text-white px-4 py-2 rounded-2xl">Créer une boutique</button>
-          <div className="mt-4 text-sm text-gray-600">CRUD articles et gestion de stock à implémenter ici.</div>
+        {/* Colonne actions */}
+        <div className="bg-white p-4 sm:p-6 rounded-xl border h-fit">
+          <h3 className="font-semibold text-lg mb-4">Actions</h3>
+          <button onClick={onCreateBoutique} className="w-full bg-green-600 text-white px-4 py-3 rounded-2xl font-medium text-sm sm:text-base hover:bg-green-700 transition">Créer une boutique</button>
+          <div className="mt-6 text-xs sm:text-sm text-gray-600 p-3 bg-gray-50 rounded">
+            <p className="font-medium mb-2">À venir:</p>
+            <p>CRUD articles et gestion de stock</p>
+          </div>
         </div>
       </div>
     </section>

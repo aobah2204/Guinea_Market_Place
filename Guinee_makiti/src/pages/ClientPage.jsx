@@ -100,58 +100,71 @@ export default function ClientPage() {
   }, [query, categoryFilter, cityFilter]);
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-12">
-      <h2 className="text-2xl font-bold mb-4">Recherche de boutiques et lieux</h2>
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6">Recherche de boutiques et lieux</h2>
 
-      <div className="flex gap-3 items-center mb-4">
-        <div>
-          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="border rounded-2xl px-4 py-2">
-            <option value="">Toutes catégories</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </div>
+      {/* Filtres - responsive grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        <select 
+          value={categoryFilter} 
+          onChange={(e) => setCategoryFilter(e.target.value)} 
+          className="border rounded-2xl px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          <option value="">Toutes catégories</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
 
-        <div>
-          <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} className="border rounded-2xl px-4 py-2">
-            <option value="">Toutes villes</option>
-            {cities.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </div>
+        <select 
+          value={cityFilter} 
+          onChange={(e) => setCityFilter(e.target.value)} 
+          className="border rounded-2xl px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          <option value="">Toutes villes</option>
+          {cities.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
 
-        <div className="flex-1">
-          <input
-            className="w-full border rounded-2xl px-4 py-3"
-            placeholder="Rechercher (nom, catégorie, ville, adresse...)"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
+        <button 
+          onClick={() => { setQuery(''); setCategoryFilter(''); setCityFilter(''); }} 
+          className="border px-4 py-2 rounded-2xl text-sm sm:text-base hover:bg-gray-50 transition"
+        >
+          Effacer filtres
+        </button>
+      </div>
 
-        <div>
-          <button onClick={() => { setQuery(''); setCategoryFilter(''); setCityFilter(''); }} className="border px-4 py-2 rounded-2xl">Effacer</button>
-        </div>
+      {/* Barre de recherche */}
+      <div className="mb-6">
+        <input
+          className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Rechercher (nom, catégorie, ville, adresse...)"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
       </div>
 
       {loading && <div className="text-sm text-gray-600 mb-2">Chargement...</div>}
 
-      <div className="relative max-w-3xl">
+      {/* Résultats - responsive */}
+      <div className="relative">
         {results.length > 0 ? (
-          <ul className="absolute z-50 w-full bg-white border rounded-md mt-2 max-h-96 overflow-auto shadow-lg">
+          <ul className="w-full bg-white border rounded-lg shadow-lg overflow-hidden">
             {results.map((r) => (
-              <li key={r.id} className="p-3 hover:bg-gray-50 border-b">
-                <div className="font-semibold">{r.business_name} <span className="text-sm font-normal text-gray-500">· {r.category}</span></div>
-                <div className="text-sm text-gray-600">{r.city} — {r.address}</div>
-                <div className="text-sm text-gray-700 mt-1">{r.description}</div>
-                <div className="text-sm text-gray-500 mt-1">Tel: {r.phone}</div>
+              <li key={r.id} className="p-4 sm:p-5 hover:bg-gray-50 border-b transition text-sm sm:text-base">
+                <div className="font-semibold text-base sm:text-lg">{r.business_name}</div>
+                <div className="text-xs sm:text-sm font-normal text-gray-500">Catégorie: {r.category}</div>
+                <div className="text-xs sm:text-sm text-gray-600 mt-1">{r.city} — {r.address}</div>
+                <div className="text-xs sm:text-sm text-gray-700 mt-2">{r.description}</div>
+                <div className="text-xs sm:text-sm text-gray-500 mt-2">Tel: {r.phone}</div>
               </li>
             ))}
           </ul>
         ) : (
-          <div className="text-sm text-gray-600">Aucun résultat</div>
+          <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg text-center">
+            {query || categoryFilter || cityFilter ? 'Aucun résultat trouvé' : 'Commencez une recherche'}
+          </div>
         )}
       </div>
     </section>

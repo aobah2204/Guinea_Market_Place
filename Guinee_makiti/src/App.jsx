@@ -82,45 +82,45 @@ function Header({ query, setQuery, search, setSearch, setAuthMode, setShowAuth, 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b shadow-sm">
       
-      <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="grid grid-cols-[25%_75%] items-center gap-[3%]">
-            <img
-              src="https://media.licdn.com/dms/image/v2/C4E0BAQHMGG0XccZzgA/company-logo_200_200/company-logo_200_200/0/1671889785007?e=2147483647&v=beta&t=yJgczdSFOGYxyyB3zHq5xMdDI5Jo8lMWCjyHKlU8PDE"
-              alt="Guinée Connect Logo"
-              className="w-14 h-14 object-contain rounded-full shadow-md "
-            /> 
-            <div>
-              <h1 className="text-2xl text-green-700 font-extrabold rounded-xl p">Guinée Connect</h1>
-              <p className="text-sm text-gray-600">Marketplace + découverte locale</p>
-            </div>
-        </span>
-      
-        <div className="flex gap-3 w-full md:w-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+        {/* Logo et titre */}
+        <div className="flex items-center gap-2 sm:gap-3 mb-4">
+          <img
+            src="https://media.licdn.com/dms/image/v2/C4E0BAQHMGG0XccZzgA/company-logo_200_200/company-logo_200_200/0/1671889785007?e=2147483647&v=beta&t=yJgczdSFOGYxyyB3zHq5xMdDI5Jo8lMWCjyHKlU8PDE"
+            alt="Guinée Connect Logo"
+            className="w-10 sm:w-12 h-10 sm:h-12 object-contain rounded-full shadow-md"
+          /> 
+          <div>
+            <h1 className="text-lg sm:text-2xl text-green-700 font-extrabold">Guinée Connect</h1>
+            <p className="text-xs sm:text-sm text-gray-600">Marketplace + découverte locale</p>
+          </div>
+        </div>
+        
+        {/* Barre de recherche */}
+        <div className="flex gap-2 mb-4 sm:mb-0">
           <input
             type="text"
-            //value={search}
-            //onChange={(e) => setSearch(e.target.value)}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher produits, services, lieux..."
-            className="flex-1 md:w-96 px-4 py-2 rounded-2xl border focus:outline-none focus:ring-2 focus:ring-green-500"
+            placeholder="Rechercher..."
+            className="flex-1 px-3 sm:px-4 py-2 rounded-2xl border text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
           />
-          <button className="bg-green-600 text-white px-5 py-2 rounded-2xl">Rechercher</button>
+          <button className="bg-green-600 text-white px-3 sm:px-5 py-2 rounded-2xl text-sm sm:text-base font-medium whitespace-nowrap">Rechercher</button>
         </div>
 
-        {/* Affichage conditionnel du message de bienvenue ou d'invitation à se connecter */}
-        <div className="flex items-center justify-center gap-2">
+        {/* Authentification - responsive */}
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mt-4 sm:mt-0">
           {isConnected ? (
-            <>
-              <div className="font-semibold">Bienvenue {authForm.fullName}</div>
-              <button onClick={async () => { await supabase.auth.signOut(); setIsConnected(false); setCurrentRole(null); setCurrentUserId(null); setShowMerchantSetup(false); }} className="bg-red-600 text-white px-4 py-2 rounded-2xl">Déconnexion</button>
-            </>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+              <div className="font-semibold text-sm sm:text-base">Bienvenue {authForm.fullName}</div>
+              <button onClick={async () => { await supabase.auth.signOut(); setIsConnected(false); setCurrentRole(null); setCurrentUserId(null); setShowMerchantSetup(false); }} className="bg-red-600 text-white px-3 sm:px-4 py-2 rounded-2xl text-sm sm:text-base w-full sm:w-auto">Déconnexion</button>
+            </div>
           ) : (
-            <>
-              <div className="font-light">Connecter vous ou créer un compte</div>
-              <button onClick={() => { setAuthMode('login'); setShowAuth(true); }} className="border px-4 py-2 rounded-2xl">Connexion</button>
-              <button onClick={() => { setAuthMode('register'); setShowAuth(true); }} className="bg-black text-white px-4 py-2 rounded-2xl">Inscription</button>
-            </>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
+              <div className="font-light text-sm sm:text-base">Connectez-vous ou créez un compte</div>
+              <button onClick={() => { setAuthMode('login'); setShowAuth(true); }} className="border px-3 sm:px-4 py-2 rounded-2xl text-sm sm:text-base w-full sm:w-auto">Connexion</button>
+              <button onClick={() => { setAuthMode('register'); setShowAuth(true); }} className="bg-black text-white px-3 sm:px-4 py-2 rounded-2xl text-sm sm:text-base w-full sm:w-auto">Inscription</button>
+            </div>
           )}
         </div>
       </div>
@@ -407,9 +407,9 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
   };
 
   return (
-    <section className="max-w-4xl mx-auto px-6 py-12">
+    <section className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       
-      <div className="bg-white rounded-3xl shadow-2xl border p-8">
+      <div className="bg-white rounded-3xl shadow-2xl border p-6 sm:p-8">
 
         {/*
         <div className="flex justify-center gap-4 mb-8">
@@ -422,24 +422,24 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
         </div>
         */}
 
-        <h2 className="text-3xl font-bold text-center mb-6">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">
           {authMode === 'login' ? 'Connexion à votre compte' : 'Créer votre compte'}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl mx-auto">
           {authMode === 'register' && (
-            <input type="text" name="fullName" placeholder="Nom complet" value={authForm.fullName} onChange={handleChange} className="w-full border rounded-2xl px-4 py-3" />
+            <input type="text" name="fullName" placeholder="Nom complet" value={authForm.fullName} onChange={handleChange} className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
           )}
 
-          <input type="email" name="email" placeholder="Email" value={authForm.email} onChange={handleChange} className="w-full border rounded-2xl px-4 py-3" />
+          <input type="email" name="email" placeholder="Email" value={authForm.email} onChange={handleChange} className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
 
           {authMode === 'register' && (
-            <input type="tel" name="phone" placeholder="Téléphone" value={authForm.phone} onChange={handleChange} className="w-full border rounded-2xl px-4 py-3" />
+            <input type="tel" name="phone" placeholder="Téléphone" value={authForm.phone} onChange={handleChange} className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
           )}
 
-          <input type="password" name="password" placeholder="Mot de passe" value={authForm.password} onChange={handleChange} className="w-full border rounded-2xl px-4 py-3" />
+          <input type="password" name="password" placeholder="Mot de passe" value={authForm.password} onChange={handleChange} className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
 
-          <select name="role" value={authForm.role} onChange={handleChange} className="w-full border rounded-2xl px-4 py-3">
+          <select name="role" value={authForm.role} onChange={handleChange} className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500">
               <option value="customer">Utilisateur</option>
               <option value="merchant">Commerçant</option>
           </select>
@@ -453,11 +453,11 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           )}
           */}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button type="submit" className="w-full bg-green-600 text-white py-3 rounded-2xl font-bold">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4">
+            <button type="submit" className="w-full bg-green-600 text-white py-3 rounded-2xl font-bold text-sm sm:text-base hover:bg-green-700 transition">
               {authMode === 'login' ? 'Se connecter' : 'Créer mon compte'}
             </button>
-            <button type="button" onClick={() => { setShowAuth(false); setAuthMode(null); }} className="w-full border py-3 rounded-2xl font-bold">
+            <button type="button" onClick={() => { setShowAuth(false); setAuthMode(null); }} className="w-full border py-3 rounded-2xl font-bold text-sm sm:text-base hover:bg-gray-50 transition">
               Annuler
             </button>
           </div>
@@ -567,15 +567,15 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
   };
 
   return (
-    <section className="max-w-4xl mx-auto px-6 py-12">
-      <div className="bg-white rounded-3xl shadow-2xl border p-8">
-        <h2 className="text-4xl font-bold text-center mb-6 text-green-700">Créer ma boutique</h2>
-        <p className="text-center text-gray-600 mb-8">
+    <section className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <div className="bg-white rounded-3xl shadow-2xl border p-6 sm:p-8">
+        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 text-green-700">Créer ma boutique</h2>
+        <p className="text-center text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base">
           Félicitations, votre compte commerçant est créé. Configurez maintenant votre boutique.
         </p>
-        <form onSubmit={handleShopSubmit} className="space-y-4 max-w-2xl mx-auto">
-          <input name="business_name" value={shopForm.business_name} onChange={handleShopChange} type="text" placeholder="Nom de la boutique" className="w-full border rounded-2xl px-4 py-3" />
-          <select name="category" value={shopForm.category} onChange={handleShopChange} className="w-full border rounded-2xl px-4 py-3">
+        <form onSubmit={handleShopSubmit} className="space-y-3 sm:space-y-4 max-w-2xl mx-auto">
+          <input name="business_name" value={shopForm.business_name} onChange={handleShopChange} type="text" placeholder="Nom de la boutique" className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
+          <select name="category" value={shopForm.category} onChange={handleShopChange} className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500">
             <option value="">Catégorie</option>
             <option value="Commerce">Commerce</option>
             <option value="Restaurant">Restaurant</option>
@@ -583,16 +583,18 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
             <option value="Hôpital">Hôpital</option>
             <option value="Services">Services</option>
           </select>
-          <input name="address" value={shopForm.address} onChange={handleShopChange} type="text" placeholder="Adresse" className="w-full border rounded-2xl px-4 py-3" />
-          <input name="city" value={shopForm.city} onChange={handleShopChange} type="text" placeholder="Ville" className="w-full border rounded-2xl px-4 py-3" />
-          <input name="phone" value={shopForm.phone} onChange={handleShopChange} type="tel" placeholder="Téléphone" className="w-full border rounded-2xl px-4 py-3" />
-          <input name="whatsapp" value={shopForm.whatsapp} onChange={handleShopChange} type="tel" placeholder="WhatsApp" className="w-full border rounded-2xl px-4 py-3" />
-          <textarea name="description" value={shopForm.description} onChange={handleShopChange} placeholder="Description de votre activité" className="w-full border rounded-2xl px-4 py-3 min-h-[120px]" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button type="submit" className="w-full bg-green-600 text-white py-3 rounded-2xl font-bold text-lg">
+          <input name="address" value={shopForm.address} onChange={handleShopChange} type="text" placeholder="Adresse" className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <input name="city" value={shopForm.city} onChange={handleShopChange} type="text" placeholder="Ville" className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
+            <input name="phone" value={shopForm.phone} onChange={handleShopChange} type="tel" placeholder="Téléphone" className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
+          </div>
+          <input name="whatsapp" value={shopForm.whatsapp} onChange={handleShopChange} type="tel" placeholder="WhatsApp" className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
+          <textarea name="description" value={shopForm.description} onChange={handleShopChange} placeholder="Description de votre activité" className="w-full border rounded-2xl px-4 py-3 min-h-[120px] text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-4">
+            <button type="submit" className="w-full bg-green-600 text-white py-3 rounded-2xl font-bold text-sm sm:text-base hover:bg-green-700 transition">
               Enregistrer ma boutique
             </button>
-            <button type="button" onClick={CloseCreateBoutique} className="w-full border py-3 rounded-2xl font-bold">
+            <button type="button" onClick={CloseCreateBoutique} className="w-full border py-3 rounded-2xl font-bold text-sm sm:text-base hover:bg-gray-50 transition">
               Annuler
             </button>
           </div>
@@ -604,48 +606,55 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
 
 function Hero({ onCreateBoutique, results }) {
   return (
-    <section className="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-10 items-center">
-      <div>
-        <h2 className="text-5xl font-extrabold leading-tight mb-6">
-          Digitalisez toute la <span className="text-green-700">Guinée</span>
-        </h2>
-        <p className="text-lg text-gray-700 mb-8">
-          Une super app nationale permettant aux commerçants, restaurants, services, hôpitaux et loisirs de créer leur présence digitale.
-        </p>
-        {/*
-        <div className="flex flex-wrap gap-4">
-          <button onClick={onCreateBoutique} className="bg-green-600 text-white px-6 py-3 rounded-2xl text-lg">Créer ma boutique</button>
-          <button className="border border-green-600 text-green-700 px-6 py-3 rounded-2xl text-lg">Télécharger l'app</button>
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+      {/* Grille responsive */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center mb-8">
+        {/* Texte */}
+        <div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 sm:mb-6">
+            Digitalisez toute la <span className="text-green-700">Guinée</span>
+          </h2>
+          <p className="text-base sm:text-lg text-gray-700 mb-6 sm:mb-8">
+            Une super app nationale permettant aux commerçants, restaurants, services, hôpitaux et loisirs de créer leur présence digitale.
+          </p>
+          {/*
+          <div className="flex flex-wrap gap-4">
+            <button onClick={onCreateBoutique} className="bg-green-600 text-white px-6 py-3 rounded-2xl text-lg">Créer ma boutique</button>
+            <button className="border border-green-600 text-green-700 px-6 py-3 rounded-2xl text-lg">Télécharger l'app</button>
+          </div>
+          */}
         </div>
-        */}
-      </div>
-      <div className="bg-white rounded-3xl shadow-2xl p-8 border">
-        <div className="aspect-video rounded-2xl bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 flex flex-col items-center justify-center text-white">
-          <img
+        
+        {/* Image */}
+        <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 border">
+          <div className="aspect-video rounded-2xl bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 flex flex-col items-center justify-center text-white">
+            <img
               src="https://png.pngtree.com/png-clipart/20230802/original/pngtree-guinea-round-button-clip-art-black-shiny-vector-picture-image_9332151.png"
               alt="Guinée Connect"
-              className="w-50 h-50 object-contain rounded-full shadow-md "
+              className="w-24 sm:w-32 lg:w-40 h-24 sm:h-32 lg:h-40 object-contain rounded-full shadow-md"
             />           
+          </div>
         </div>
       </div>
 
-      <div className="relative max-w-3xl">
+      {/* Résultats - fullwidth */}
+      <div className="relative">
         {results.length > 0 ? (
-          <ul className="absolute z-50 w-full bg-white border rounded-md mt-2 max-h-96 overflow-auto shadow-lg">
+          <ul className="w-full bg-white border rounded-lg shadow-lg overflow-hidden">
             {results.map((r) => (
-              <li key={r.id} className="p-3 hover:bg-gray-50 border-b">
-                <div className="font-semibold">{r.business_name} <span className="text-sm font-normal text-gray-500">· {r.category}</span></div>
-                <div className="text-sm text-gray-600">{r.city} — {r.address}</div>
-                <div className="text-sm text-gray-700 mt-1">{r.description}</div>
-                <div className="text-sm text-gray-500 mt-1">Tel: {r.phone}</div>
+              <li key={r.id} className="p-4 sm:p-5 hover:bg-gray-50 border-b transition text-sm sm:text-base">
+                <div className="font-semibold text-base sm:text-lg">{r.business_name}</div>
+                <div className="text-xs sm:text-sm font-normal text-gray-500">Catégorie: {r.category}</div>
+                <div className="text-xs sm:text-sm text-gray-600 mt-1">{r.city} — {r.address}</div>
+                <div className="text-xs sm:text-sm text-gray-700 mt-2">{r.description}</div>
+                <div className="text-xs sm:text-sm text-gray-500 mt-2">Tel: {r.phone}</div>
               </li>
             ))}
           </ul>
         ) : (
-          <div className="text-sm text-gray-600">Aucun résultat</div>
+          <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg text-center">Aucun résultat</div>
         )}
       </div>
-
     </section>
   );
 }
