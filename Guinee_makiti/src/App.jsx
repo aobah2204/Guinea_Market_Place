@@ -13,6 +13,8 @@ import {
 import supabase from './lib/supabaseClient';
 import ClientPage from './pages/ClientPage';
 import MerchantPage from './pages/MerchantPage';
+import { v4 as uuidv4 } from 'uuid';
+
 
 class FormData {
   fullName = '';
@@ -22,9 +24,11 @@ class FormData {
   role = 'customer';
 };
 
+
+
 // Table mapping and helpers
 const MERCHANT_TABLE = 'users_merchant';
-const CUSTOMER_TABLES = ['users_customers'];
+const CUSTOMER_TABLES = 'users_customers';
 
 async function findProfileByEmail(email) {
   // try merchant first
@@ -35,20 +39,20 @@ async function findProfileByEmail(email) {
     // ignore
   }
 
-  for (const t of CUSTOMER_TABLES) {
+  //for (const t of CUSTOMER_TABLES) {
     try {
-      const { data } = await supabase.from(t).select('*').eq('email', email).maybeSingle();
-      if (data) return { profile: data, table: t, role: 'customer' };
+      const { data } = await supabase.from(CUSTOMER_TABLES).select('*').eq('email', email).maybeSingle();
+      if (data) return { profile: data, table: CUSTOMER_TABLES, role: 'customer' };
     } catch (e) {
       // ignore and try next
     }
-  }
+  //}
 
   return { profile: null, table: null, role: null };
 }
 
 function getProfileTable(role) {
-  return role === 'merchant' ? MERCHANT_TABLE : CUSTOMER_TABLES[0];
+  return role === 'merchant' ? MERCHANT_TABLE : CUSTOMER_TABLES;
 }
 
 async function findProfileByEmailAndRole(email, role) {
@@ -67,12 +71,12 @@ async function findProfileById(id) {
     if (m) return { profile: m, table: MERCHANT_TABLE, role: 'merchant' };
   } catch (e) {}
 
-  for (const t of CUSTOMER_TABLES) {
+  //for (const t of CUSTOMER_TABLES) {
     try {
-      const { data } = await supabase.from(t).select('*').eq('id', id).maybeSingle();
-      if (data) return { profile: data, table: t, role: 'customer' };
+      const { data } = await supabase.from(CUSTOMER_TABLES).select('*').eq('id', id).maybeSingle();
+      if (data) return { profile: data, table: CUSTOMER_TABLES, role: 'customer' };
     } catch (e) {}
-  }
+  //}
 
   return { profile: null, table: null, role: null };
 }
@@ -143,9 +147,9 @@ function Header({ query, setQuery, search, setSearch, setAuthMode, setShowAuth, 
   );
 }
 
-function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth, setShowMerchantSetup, setIsConnected, setCurrentRole, setCurrentUserId, setAccessMessage, setSuccessMessage, setErrorMessage }) {
-  const navigate = useNavigate();
-  
+function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth, setShowMerchantSetup, setIsConnected, setCurrentRole, setCurrentUserId, setAccessMessage, setSuccessMessage, setErrorMessage, setCurrentUser, currentUser }) {
+  const navigate = useNavigate();  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -158,7 +162,184 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
   const handleSubmit = async (e) => {
     e.preventDefault();   
 
-    try {
+    try { 
+      const email = authForm.email.trim().toLowerCase();
+      const password = authForm.password;
+      //const role = authForm.role;
+
+      if (authMode === 'register' && authForm.role === 'merchant') {
+
+        if (!email || !password) {
+          throw new Error('Email ou mot de passe manquant.');
+        }
+
+        const userId = uuidv4();
+
+        const { error: insertError } = await supabase.from(MERCHANT_TABLE).insert([
+            {
+              id: userId, // UUID générée manuellement
+              full_name: authForm.fullName,
+              email,
+              phone: authForm.phone,
+              role: authForm.role,
+          },
+          ]);
+
+          if (insertError) {
+            throw insertError;
+          }
+          
+
+          setShowAuth(false);
+          setAuthMode(null);
+          setIsConnected(true);
+          setAuthForm((prev) => ({
+            ...prev,
+            fullName: authForm.fullName || prev.fullName,
+            role: authForm.role,
+          }));
+          setCurrentRole(authForm.role);
+          setCurrentUserId(userId);
+          setSuccessMessage('Création compte réussie.');
+          navigate(authForm.role === 'merchant' ? '/merchant' : '/client');
+          return;
+      }
+      
+      if(authMode === 'register' && authForm.role === 'customer'){
+
+        if (!email || !password) {
+          throw new Error('Email ou mot de passe manquant.');
+        }
+
+        if (!email || !password) {
+          throw new Error('Email ou mot de passe manquant.');
+        }
+
+        const userId = uuidv4();
+        const { error: insertError } = await supabase.from(CUSTOMER_TABLES).insert([
+            {
+              id: userId,
+              full_name: authForm.fullName,
+              email,
+              phone: authForm.phone,
+              role: authForm.role,
+          },
+          ]);
+
+          if (insertError) {
+            throw insertError;
+          }
+          
+
+          setShowAuth(false);
+          setAuthMode(null);
+          setIsConnected(true);
+          setAuthForm((prev) => ({
+            ...prev,
+            fullName: authForm.fullName || prev.fullName,
+            role: authForm.role,
+          }));
+          setCurrentRole(authForm.role);
+          setCurrentUserId(userId);
+          setSuccessMessage('Création compte réussie.');
+          navigate(authForm.role === 'merchant' ? '/merchant' : '/client');
+          return;
+
+      }
+
+      if (authMode === 'login' && authForm.role === 'merchant') {
+
+          const { data: existingUser , error: selectError} = await supabase
+          .from(MERCHANT_TABLE)
+          .select("id, full_name,email, phone, role")
+          .eq("email", authForm.email.trim())
+          .eq("phone", authForm.phone.trim())
+          .maybeSingle();
+
+          if (selectError) {
+            throw selectError;
+          }
+
+          // Set Current User
+          if(existingUser){
+            setCurrentUser({
+              id: existingUser.id,
+              fullName: existingUser.full_name,
+              email: existingUser.email,
+              phone: existingUser.phone,
+              password: '',
+              role: existingUser.role,
+            });
+          }
+          
+
+          setShowAuth(false);
+          setAuthMode(null);
+          setIsConnected(true);
+          setAuthForm((prev) => ({
+            ...prev,
+            fullName: authForm.fullName || prev.fullName,
+            role: authForm.role,
+          }));
+          setCurrentRole(authForm.role);
+          setCurrentUserId(existingUser.id);
+          setSuccessMessage('Connexion réussie.');
+          navigate(authForm.role === 'merchant' ? '/merchant' : '/client');
+
+
+      }
+      
+      if(authMode === 'login' && authForm.role === 'customer'){
+
+        const { data: user , error: selectError} = await supabase
+          .from(CUSTOMER_TABLES)
+          .select("id, full_name,email, phone, role")
+          .eq("email", authForm.email.trim())
+          .eq("phone", authForm.phone.trim())
+          .maybeSingle();
+
+          if (selectError) {
+            throw selectError;
+          }
+
+          // Set Current User
+          if(user){
+            setCurrentUser({
+              id: user.id,
+              fullName: user.full_name,
+              email: user.email,
+              phone: user.phone,
+              password: '',
+              role: user.role,
+            });            
+          }
+
+          setShowAuth(false);
+          setAuthMode(null);
+          setIsConnected(true);
+          setAuthForm((prev) => ({
+            ...prev,
+            fullName: authForm.fullName || prev.fullName,
+            role: authForm.role,
+          }));
+          setCurrentRole(authForm.role);
+          setCurrentUserId(user.id);
+          setSuccessMessage('Connexion réussie.');
+          navigate(authForm.role === 'merchant' ? '/merchant' : '/client');
+
+      }
+
+
+    } catch (error) {
+      console.error('Auth error:', error);
+      setErrorMessage(error.message);
+    }
+  };
+
+  const handleSubmit_old = async (e) => {
+    e.preventDefault();   
+
+    try { 
       const email = authForm.email.trim().toLowerCase();
       const password = authForm.password;
 
@@ -269,7 +450,7 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           throw new Error('Compte Auth non créé correctement. Vérifiez Supabase Authentication > Users.');
         }
 
-        const profileTable = authForm.role === 'merchant' ? MERCHANT_TABLE : CUSTOMER_TABLES[0];
+        const profileTable = authForm.role === 'merchant' ? MERCHANT_TABLE : CUSTOMER_TABLES;
         console.log('=== PROFILE CREATION ===');
         console.log('Table:', profileTable);
         console.log('User ID:', data.user.id);
@@ -702,6 +883,15 @@ export default function GuineeMarketplaceApp() {
   const [cityFilter, setCityFilter] = useState('');
   const [results, setResults] = useState([]);
 
+  const [currentUser, setCurrentUser] = useState({
+    id: 0,
+    fullName: '',
+    email: '',
+    phone: '',
+    password: '',
+    role: '',
+  });
+
   // Auto-close messages after 5 seconds
   useEffect(() => {
     if (accessMessage) {
@@ -735,7 +925,7 @@ export default function GuineeMarketplaceApp() {
       }
       */}
     
-      setLoading(true);
+      //setLoading(true);
 
       try {
         let sb = supabase
@@ -766,7 +956,7 @@ export default function GuineeMarketplaceApp() {
         setResults([]);
       }
 
-      setLoading(false);
+      //(false);
     };
 
     const t = setTimeout(fetchResults, 250);
@@ -894,7 +1084,7 @@ export default function GuineeMarketplaceApp() {
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-yellow-50 text-gray-900">
-        <Header query={query} setQuery={setQuery} search={search} setSearch={setSearch} setAuthMode={setAuthMode} setShowAuth={setShowAuth} isConnected={isConnected} setIsConnected={setIsConnected} authForm={authForm} setCurrentRole={setCurrentRole} setCurrentUserId={setCurrentUserId} setShowMerchantSetup={setShowMerchantSetup} setResults={setResults} />
+        <Header query={query} setQuery={setQuery} search={search} setSearch={setSearch} setAuthMode={setAuthMode} setShowAuth={setShowAuth} isConnected={isConnected} setIsConnected={setIsConnected} authForm={authForm} setCurrentRole={setCurrentRole} setCurrentUserId={setCurrentUserId} setShowMerchantSetup={setShowMerchantSetup} setResults={setResults} setCurrentUser={setCurrentUser} />
 
         {showAuth && (
           <AuthSection
@@ -910,6 +1100,7 @@ export default function GuineeMarketplaceApp() {
             setAccessMessage={setAccessMessage}
             setSuccessMessage={setSuccessMessage}
             setErrorMessage={setErrorMessage}
+            setCurrentUser={setCurrentUser}
           />
         )}
 

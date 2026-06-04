@@ -82,6 +82,7 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
   };
 
   const startPhotoUpload = (b) => {
+    
     if (!currentUserId || b.owner_id !== currentUserId) {
       alert('Vous n\'êtes pas autorisé à ajouter des photos à cette boutique.');
       return;
@@ -105,6 +106,11 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
       const { data } = await supabase.auth.getSession();
       owner_id = data?.session?.user?.id;
     }
+
+    console.log('Inserting photo with payload:', { business_id: photoForm.business_id, photo_url: photoUrl, owner_id });
+    console.log('=== Inserting photo with payload: ===');
+    console.log('Event:', event);
+    console.log('Session user ID:', owner_id);
 
     const insertPayload = { business_id: photoForm.business_id, photo_url: photoUrl };
     if (owner_id) insertPayload.owner_id = owner_id;
