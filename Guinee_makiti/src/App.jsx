@@ -260,6 +260,8 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
             throw selectError;
           }
 
+          const { profile: currentRoleProfile, table: currentRoleTable } = await findProfileByEmailAndRole(email, authForm.role);
+
           // Set Current User
           if(existingUser){
             setCurrentUser({
@@ -282,10 +284,9 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
             role: authForm.role,
           }));
           setCurrentRole(authForm.role);
-          setCurrentUserId(existingUser.id);
+          if (currentRoleProfile?.id) setCurrentUserId(currentRoleProfile.id);
           setSuccessMessage('Connexion réussie.');
           navigate(authForm.role === 'merchant' ? '/merchant' : '/client');
-
 
       }
       
@@ -301,6 +302,10 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           if (selectError) {
             throw selectError;
           }
+
+          
+        const { profile: existingUser, table: existingTable, role: existingRole } = await findProfileByEmail(email);
+        const { profile: currentRoleProfile, table: currentRoleTable } = await findProfileByEmailAndRole(email, authForm.role);
 
           // Set Current User
           if(user){
@@ -323,7 +328,8 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
             role: authForm.role,
           }));
           setCurrentRole(authForm.role);
-          setCurrentUserId(user.id);
+          //setCurrentUserId(user.id);
+          if (currentRoleProfile?.id) setCurrentUserId(currentRoleProfile.id);
           setSuccessMessage('Connexion réussie.');
           navigate(authForm.role === 'merchant' ? '/merchant' : '/client');
 
