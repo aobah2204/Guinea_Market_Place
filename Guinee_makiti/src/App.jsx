@@ -81,7 +81,7 @@ async function findProfileById(id) {
   return { profile: null, table: null, role: null };
 }
 
-function Header({ query, setQuery, search, setSearch, setAuthMode, setShowAuth, isConnected, setIsConnected, authForm, setCurrentRole, setCurrentUserId, setShowMerchantSetup }) {
+function Header({ query, setQuery, search, setSearch, setAuthMode, setShowAuth, isConnected, setIsConnected, authForm, setCurrentRole, setCurrentUserId, setShowMerchantSetup, onToggleHeader }) {
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b shadow-sm">
@@ -89,11 +89,13 @@ function Header({ query, setQuery, search, setSearch, setAuthMode, setShowAuth, 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
         {/* Logo et titre */}
         <div className="flex items-center gap-2 sm:gap-3 mb-4">
-          <img
-            src="https://media.licdn.com/dms/image/v2/C4E0BAQHMGG0XccZzgA/company-logo_200_200/company-logo_200_200/0/1671889785007?e=2147483647&v=beta&t=yJgczdSFOGYxyyB3zHq5xMdDI5Jo8lMWCjyHKlU8PDE"
-            alt="Guinée Connect Logo"
-            className="w-10 sm:w-12 h-10 sm:h-12 object-contain rounded-full shadow-md"
-          /> 
+          <button onClick={onToggleHeader} className="rounded-full border p-1 hover:ring-2 hover:ring-green-500 transition" aria-label="Afficher / masquer le header">
+            <img
+              src="https://media.licdn.com/dms/image/v2/C4E0BAQHMGG0XccZzgA/company-logo_200_200/company-logo_200_200/0/1671889785007?e=2147483647&v=beta&t=yJgczdSFOGYxyyB3zHq5xMdDI5Jo8lMWCjyHKlU8PDE"
+              alt="Guinée Connect Logo"
+              className="w-10 sm:w-12 h-10 sm:h-12 object-contain rounded-full shadow-md"
+            />
+          </button>
           <div>
             <h1 className="text-lg sm:text-2xl text-green-700 font-extrabold">Guinée Connect</h1>
             <p className="text-xs sm:text-sm text-gray-600">Marketplace + découverte locale</p>
@@ -519,7 +521,7 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           
           if (authForm.role === 'merchant') {
             setShowMerchantSetup(true);
-            //navigate('/merchant');
+            navigate('/merchant');
           } else {
             navigate('/client');
           }
@@ -918,6 +920,7 @@ export default function GuineeMarketplaceApp() {
   const [isConnected, setIsConnected] = useState(false);
   const [currentRole, setCurrentRole] = useState(null); // 'customer' | 'merchant' | null
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [showHeader, setShowHeader] = useState(true);
   const [accessMessage, setAccessMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -939,6 +942,18 @@ export default function GuineeMarketplaceApp() {
     password: '',
     role: '',
   });
+
+  const toggleHeader = () => setShowHeader((prev) => !prev);
+  const isClientOrMerchantPage = currentRole === 'merchant' || currentRole === 'customer';
+  const shouldShowHeader = !isClientOrMerchantPage || showHeader;
+
+  useEffect(() => {
+    if (currentRole === 'merchant' || currentRole === 'customer') {
+      setShowHeader(false);
+    } else {
+      setShowHeader(true);
+    }
+  }, [currentRole]);
 
   // Auto-close messages after 5 seconds
   useEffect(() => {
@@ -1089,7 +1104,41 @@ export default function GuineeMarketplaceApp() {
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-yellow-50 text-gray-900">
-        <Header query={query} setQuery={setQuery} search={search} setSearch={setSearch} setAuthMode={setAuthMode} setShowAuth={setShowAuth} isConnected={isConnected} setIsConnected={setIsConnected} authForm={authForm} setCurrentRole={setCurrentRole} setCurrentUserId={setCurrentUserId} setShowMerchantSetup={setShowMerchantSetup} setResults={setResults} setCurrentUser={setCurrentUser} />
+        {shouldShowHeader && (
+          <Header
+            query={query}
+            setQuery={setQuery}
+            search={search}
+            setSearch={setSearch}
+            setAuthMode={setAuthMode}
+            setShowAuth={setShowAuth}
+            isConnected={isConnected}
+            setIsConnected={setIsConnected}
+            authForm={authForm}
+            setCurrentRole={setCurrentRole}
+            setCurrentUserId={setCurrentUserId}
+            setShowMerchantSetup={setShowMerchantSetup}
+            setResults={setResults}
+            setCurrentUser={setCurrentUser}
+            onToggleHeader={toggleHeader}
+          />
+        )}
+
+        {!showHeader && isClientOrMerchantPage && (
+          <div className="fixed top-4 right-4 z-50">
+            <button
+              onClick={toggleHeader}
+              className="rounded-full border bg-white p-2 shadow-lg hover:ring-2 hover:ring-green-500 transition"
+              aria-label="Afficher le header"
+            >
+              <img
+                src="https://media.licdn.com/dms/image/v2/C4E0BAQHMGG0XccZzgA/company-logo_200_200/company-logo_200_200/0/1671889785007?e=2147483647&v=beta&t=yJgczdSFOGYxyyB3zHq5xMdDI5Jo8lMWCjyHKlU8PDE"
+                alt="Logo Guinée Connect"
+                className="w-10 h-10 object-contain rounded-full"
+              />
+            </button>
+          </div>
+        )}
 
         {showAuth && (
           <AuthSection
