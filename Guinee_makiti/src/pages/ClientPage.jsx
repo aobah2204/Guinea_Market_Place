@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react';
 import supabase from '../lib/supabaseClient';
 
-export default function ClientPage() {
+export default function ClientPage({ setAccessMessage, setSuccessMessage, setErrorMessage }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
+  const [businessPhotos, setBusinessPhotos] = useState({});
   const [loading, setLoading] = useState(false);
 
   const [categories, setCategories] = useState([]);
   const [cities, setCities] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [cityFilter, setCityFilter] = useState('');
+
+  const showAccessMessage = (msg) => typeof setAccessMessage === 'function' && setAccessMessage(msg);
+  const showSuccessMessage = (msg) => typeof setSuccessMessage === 'function' && setSuccessMessage(msg);
+  const showErrorMessage = (msg) => typeof setErrorMessage === 'function' && setErrorMessage(msg);
 
   // load filter options
   useEffect(() => {
@@ -46,10 +51,37 @@ export default function ClientPage() {
 
       } catch (e) {
         console.error('Filter load error', e);
+        showErrorMessage('Erreur lors du chargement des filtres.');
       }
     };
     loadFilters();
   }, []);
+
+  const loadBusinessPhotos = async (businessIds = []) => {
+    if (!businessIds.length) {
+      setBusinessPhotos({});
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.from('business_photos').select('business_id, photo_url').in('business_id', businessIds).order('id', { ascending: true }).limit(100);
+      if (error) {
+        console.error('Load business photos error:', error);
+        setBusinessPhotos({});
+        return;
+      }
+
+      const grouped = (data || []).reduce((acc, photo) => {
+        if (!acc[photo.business_id]) acc[photo.business_id] = [];
+        acc[photo.business_id].push(photo);
+        return acc;
+      }, {});
+      setBusinessPhotos(grouped);
+    } catch (e) {
+      console.error('Load business photos exception:', e);
+      setBusinessPhotos({});
+    }
+  };
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -83,13 +115,19 @@ export default function ClientPage() {
 
         if (error) {
           console.error('Search error:', error);
+          showErrorMessage('Erreur lors de la recherche.');
           setResults([]);
+          setBusinessPhotos({});
         } else {
-          setResults(data || []);
+          const resultData = data || [];
+          setResults(resultData);
+          await loadBusinessPhotos(resultData.map((item) => item.id));
         }
       } catch (e) {
         console.error(e);
+        showErrorMessage('Erreur lors de la recherche.');
         setResults([]);
+        setBusinessPhotos({});
       }
 
       setLoading(false);
@@ -99,7 +137,8 @@ export default function ClientPage() {
     return () => clearTimeout(t);
   }, [query, categoryFilter, cityFilter]);
 
-  return (
+  return (   
+
     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6">Recherche de boutiques et lieux</h2>
 
@@ -158,6 +197,18 @@ export default function ClientPage() {
                 <div className="text-xs sm:text-sm text-gray-600 mt-1">{r.city} — {r.address}</div>
                 <div className="text-xs sm:text-sm text-gray-700 mt-2">{r.description}</div>
                 <div className="text-xs sm:text-sm text-gray-500 mt-2">Tel: {r.phone}</div>
+                {(businessPhotos[r.id] || []).length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    {businessPhotos[r.id].slice(0, 2).map((photo) => (
+                      <img
+                        key={photo.photo_url}
+                        src={photo.photo_url}
+                        alt={`Photo boutique ${r.business_name}`}
+                        className="h-24 w-full object-cover rounded-lg border"
+                      />
+                    ))}
+                  </div>
+                )}
               </li>
             ))}
           </ul>

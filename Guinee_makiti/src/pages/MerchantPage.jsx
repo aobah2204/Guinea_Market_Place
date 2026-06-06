@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import supabase from '../lib/supabaseClient';
 
-export default function MerchantPage({ user, onCreateBoutique, currentUserId: propCurrentUserId }) {
+export default function MerchantPage({ user, onCreateBoutique, currentUserId: propCurrentUserId, setAccessMessage, setSuccessMessage, setErrorMessage }) {
   const [businesses, setBusinesses] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(propCurrentUserId || null);
   const [editingId, setEditingId] = useState(null);
@@ -9,6 +9,10 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
   const [businessPhotos, setBusinessPhotos] = useState({});
   const [photoForm, setPhotoForm] = useState({ business_id: null, url: '', file: null });
   const [photoModeOpen, setPhotoModeOpen] = useState(null);
+
+  const showAccessMessage = (msg) => typeof setAccessMessage === 'function' && setAccessMessage(msg);
+  const showSuccessMessage = (msg) => typeof setSuccessMessage === 'function' && setSuccessMessage(msg);
+  const showErrorMessage = (msg) => typeof setErrorMessage === 'function' && setErrorMessage(msg);
 
   const loadPhotos = async (businessIds = []) => {
     if (!businessIds.length) {
@@ -61,7 +65,7 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
 
   const startEdit = (b) => {
     if (!currentUserId || b.owner_id !== currentUserId) {
-      alert('Vous n\'êtes pas autorisé à modifier cette boutique.');
+      showAccessMessage('Vous n\'êtes pas autorisé à modifier cette boutique.');
       return;
     }
     setEditingId(b.id);
@@ -84,7 +88,7 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
   const startPhotoUpload = (b) => {
     
     if (!currentUserId || b.owner_id !== currentUserId) {
-      alert('Vous n\'êtes pas autorisé à ajouter des photos à cette boutique.');
+      showAccessMessage('Vous n\'êtes pas autorisé à ajouter des photos à cette boutique.');
       return;
     }
     setPhotoModeOpen(b.id);
@@ -107,11 +111,6 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
       owner_id = data?.session?.user?.id;
     }
 
-    console.log('Inserting photo with payload:', { business_id: photoForm.business_id, photo_url: photoUrl, owner_id });
-    console.log('=== Inserting photo with payload: ===');
-    console.log('Event:', event);
-    console.log('Session user ID:', owner_id);
-
     const insertPayload = { business_id: photoForm.business_id, photo_url: photoUrl };
     if (owner_id) insertPayload.owner_id = owner_id;
 
@@ -130,45 +129,56 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
       if (!photoForm.business_id) throw new Error('Aucune boutique sélectionnée.');
       const existingPhotos = businessPhotos[photoForm.business_id] || [];
       if (existingPhotos.length >= 6) {
-        alert('Maximum de 6 photos atteints pour cette boutique.');
+        showErrorMessage('Maximum de 6 photos atteints pour cette boutique.');
         return;
       }
 
+      const project = 'ydcvbhbupxohetlugxmp.supabase.co';
+      const bucket = 'business_photos';
+
       let photoUrl = photoForm.url?.trim();
+      let filePath = null;
+
       if (photoForm.file) {
         const file = photoForm.file;
-        const filePath = `business_photos/${photoForm.business_id}/${Date.now()}_${file.name}`;
-        {/*}
-        const { data, error: uploadError } = await supabase.storage.from('business_photos').upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-        */}
-        const { data, error: uploadError } = await supabase.from('business_photos').insert([{ photo_url: filePath, business_id: photoForm.business_id }]);
+        const safeName = encodeURIComponent(file.name);
+        filePath = `public/${photoForm.business_id}/${Date.now()}_${safeName}`;
+
+        const { data, error: uploadError } = await supabase.storage.from('business_photos').upload(filePath, file);
         if (uploadError) {
           throw new Error('Erreur de téléchargement du fichier : ' + uploadError.message);
         }
-        const { data: publicData, error: publicError } = supabase.from('business_photos').select('photo_url').eq('photo_url', data.photo_url);
-        if (publicError) {
-          throw new Error('Impossible de récupérer l\'URL publique : ' + publicError.message);
+
+        const { data: publicData } = supabase.storage.from('business_photos').getPublicUrl(filePath);
+        if (!publicData?.publicUrl) {
+          throw new Error('Impossible de récupérer l\'URL publique.');
         }
-        photoUrl = publicData[0].photo_url;
+        
+        photoUrl = publicData.publicUrl;        
       }
 
       if (!photoUrl) {
-        throw new Error('Fournissez une URL de photo ou chargez un fichier.');
+          throw new Error('Fournissez une URL de photo ou chargez un fichier.');
       }
 
-      await uploadPhoto(photoUrl);
+      const publicUrl = `https://${project}/storage/v1/object/public/${bucket}/${filePath}`;      
+
+      // await uploadPhoto(photoUrl);
+      const { data, error: uploadError } = await supabase.from('business_photos').insert([{ photo_url: publicUrl, business_id: photoForm.business_id }]);
+      if (uploadError) {
+         throw new Error('Erreur lors de l\'insertion de la photo : ' + uploadError.message);
+      }
+
       await load();
+      showSuccessMessage('Photo ajoutée avec succès.');
       setPhotoModeOpen(null);
     } catch (err) {
       console.error('Photo upload error', err);
       const msg = (err?.message || String(err)).toLowerCase();
       if (msg.includes('row-level') || msg.includes('rls') || msg.includes('policy') || msg.includes('new row violates')) {
-        alert("Impossible d'ajouter la photo à cause d'une règle de sécurité (RLS). Vérifiez la policy INSERT de la table 'business_photos' ou assurez-vous que 'owner_id' correspond à votre utilisateur. Voir la console pour plus de détails.");
+        showErrorMessage("Impossible d'ajouter la photo à cause d'une règle de sécurité (RLS) : " + err.message);
       } else {
-        alert('Erreur lors de l\'ajout de la photo : ' + (err.message || err));
+        showErrorMessage('Erreur lors de l\'ajout de la photo : ' + (err.message || err));
       }
     }
   };
@@ -176,12 +186,32 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
   const deletePhoto = async (photoId) => {
     if (!confirm('Voulez-vous vraiment supprimer cette photo ?')) return;
     try {
+      const { data: photoData, error: selectError } = await supabase.from('business_photos').select('photo_url').eq('id', photoId).single();
+      if (selectError) throw selectError;
+
+      const photoUrl = photoData?.photo_url;
+      if (photoUrl && typeof photoUrl === 'string' && photoUrl.includes('/storage/v1/object/public/')) {
+        const parts = photoUrl.split('/storage/v1/object/public/');
+        let objectPath = parts[1] || '';
+        if (objectPath.startsWith('business_photos/')) {
+          objectPath = objectPath.replace(/^business_photos\//, '');
+        }
+        if (objectPath) {
+          const { error: storageError } = await supabase.storage.from('business_photos').remove([objectPath]);
+          if (storageError) {
+            console.warn('Storage delete warning:', storageError);
+            // continuer même si la suppression du fichier échoue, pour éviter de laisser un blocage sur la suppression de la ligne
+          }
+        }
+      }
+
       const { error } = await supabase.from('business_photos').delete().eq('id', photoId);
       if (error) throw error;
       await load();
+      showSuccessMessage('Photo supprimée avec succès.');
     } catch (err) {
       console.error('Delete photo error', err);
-      alert('Erreur lors de la suppression de la photo : ' + (err.message || err));
+      showErrorMessage('Erreur lors de la suppression de la photo : ' + (err.message || err));
     }
   };
 
@@ -201,15 +231,16 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
       if (error) throw error;
       await load();
       cancelEdit();
+      showSuccessMessage('Boutique mise à jour avec succès.');
     } catch (err) {
       console.error('Update error', err);
-      alert('Erreur lors de la mise à jour: ' + (err.message || err));
+      showErrorMessage('Erreur lors de la mise à jour: ' + (err.message || err));
     }
   };
 
   const deleteBusiness = async (id, ownerId) => {
     if (!currentUserId || ownerId !== currentUserId) {
-      alert('Vous n\'êtes pas autorisé à supprimer cette boutique.');
+      showAccessMessage('Vous n\'êtes pas autorisé à supprimer cette boutique.');
       return;
     }
     if (!confirm('Voulez-vous vraiment supprimer cette boutique ? Cette action est irréversible.')) return;
@@ -217,9 +248,10 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
       const { error } = await supabase.from('businesses').delete().eq('id', id);
       if (error) throw error;
       await load();
+      showSuccessMessage('Boutique supprimée avec succès.');
     } catch (err) {
       console.error('Delete error', err);
-      alert('Erreur lors de la suppression: ' + (err.message || err));
+      showErrorMessage('Erreur lors de la suppression: ' + (err.message || err));
     }
   };
 
@@ -231,7 +263,9 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Colonne boutiques */}
         <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-xl border">
-          <h3 className="font-semibold text-lg mb-4">Vos boutiques</h3>
+          <button onClick={onCreateBoutique} className="bg-green-600 text-white px-4 py-3 rounded-2xl font-medium text-sm sm:text-base hover:bg-green-700 transition">Créer une boutique</button>
+          
+          <h3 className="font-semibold text-lg mb-4">Vos boutiques</h3>          
           <ul className="space-y-3 sm:space-y-4">
             {businesses.map((b) => (
               <li key={b.id} className="p-4 border rounded-lg hover:bg-gray-50 transition">

@@ -270,14 +270,14 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           const { profile: currentRoleProfile, table: currentRoleTable } = await findProfileByEmailAndRole(email, authForm.role);
 
           // Set Current User
-          if(existingUser){
+          if(currentRoleProfile){
             setCurrentUser({
-              id: existingUser.id,
-              fullName: existingUser.full_name,
-              email: existingUser.email,
-              phone: existingUser.phone,
+              id: currentRoleProfile.id,
+              fullName: currentRoleProfile.full_name,
+              email: currentRoleProfile.email,
+              phone: currentRoleProfile.phone,
               password: '',
-              role: existingUser.role,
+              role: currentRoleProfile.role,
             });
           }
           
@@ -318,14 +318,14 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
         const { profile: currentRoleProfile, table: currentRoleTable } = await findProfileByEmailAndRole(email, authForm.role);
 
           // Set Current User
-          if(user){
+          if(currentRoleProfile){
             setCurrentUser({
-              id: user.id,
-              fullName: user.full_name,
-              email: user.email,
-              phone: user.phone,
+              id: currentRoleProfile.id,
+              fullName: currentRoleProfile.full_name,
+              email: currentRoleProfile.email,
+              phone: currentRoleProfile.phone,
               password: '',
-              role: user.role,
+              role: currentRoleProfile.role,
             });            
           }
 
@@ -1035,6 +1035,7 @@ export default function GuineeMarketplaceApp() {
   useEffect(() => {
     const restoreSession = async () => {
 
+      console.info("Restoration session ...");
 
       const { data } = await supabase.auth.getSession();
       const session = data?.session;
@@ -1042,7 +1043,7 @@ export default function GuineeMarketplaceApp() {
       const savedUser = localStorage.getItem("currentUserEmail");
       const savedRole = localStorage.getItem("userRole");
 
-      const CurrentUser = await findProfileByEmailAndRole(savedUser, savedRole);
+      const { profile: CurrentUser} = await findProfileByEmailAndRole(savedUser, savedRole);
 
       console.log('Restoring session:', CurrentUser?.id);
 
@@ -1144,11 +1145,11 @@ export default function GuineeMarketplaceApp() {
         <Routes>
           <Route
             path="/client"
-            element={<ProtectedRoute allowedRole="customer"><ClientPage /></ProtectedRoute>}
+            element={<ProtectedRoute allowedRole="customer"><ClientPage setAccessMessage={setAccessMessage} setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} /></ProtectedRoute>}
           />
           <Route
             path="/merchant"
-            element={<ProtectedRoute allowedRole="merchant">{showMerchantSetup ? <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} setShowMerchantSetup={setShowMerchantSetup} currentUserId={currentUserId} /> : <MerchantPage onCreateBoutique={() => setShowMerchantSetup(true)} currentUserId={currentUserId} />}</ProtectedRoute>}
+            element={<ProtectedRoute allowedRole="merchant">{showMerchantSetup ? <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} setShowMerchantSetup={setShowMerchantSetup} currentUserId={currentUserId} /> : <MerchantPage onCreateBoutique={() => setShowMerchantSetup(true)} currentUserId={currentUserId} setAccessMessage={setAccessMessage} setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} />}</ProtectedRoute>}
           />
           <Route
             path="/"
@@ -1163,9 +1164,9 @@ export default function GuineeMarketplaceApp() {
                 <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} setShowMerchantSetup={setShowMerchantSetup} currentUserId={currentUserId} />
               ) : isConnected ? (
                 currentRole === 'merchant' ? (
-                  <MerchantPage onCreateBoutique={() => setShowMerchantSetup(true)} currentUserId={currentUserId} />
+                  <MerchantPage onCreateBoutique={() => setShowMerchantSetup(true)} currentUserId={currentUserId} setAccessMessage={setAccessMessage} setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} />
                 ) : (
-                  <ClientPage />
+                  <ClientPage setAccessMessage={setAccessMessage} setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} />
                 ) 
               ) : (
                 <Hero onCreateBoutique={() => setShowMerchantSetup(true)} results={results} query={query} />
