@@ -199,7 +199,7 @@ export default function ClientPage({ setAccessMessage, setSuccessMessage, setErr
                 <div className="text-xs sm:text-sm text-gray-500 mt-2">Tel: {r.phone}</div>
                 {(businessPhotos[r.id] || []).length > 0 && (
                   <div className="mt-4 grid grid-cols-2 gap-2">
-                    {businessPhotos[r.id].slice(0, 2).map((photo) => (
+                    {businessPhotos[r.id].slice(0, 6).map((photo) => (
                       <img
                         key={photo.photo_url}
                         src={photo.photo_url}
