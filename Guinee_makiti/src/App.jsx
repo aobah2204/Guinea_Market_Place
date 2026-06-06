@@ -165,7 +165,7 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
     try { 
       const email = authForm.email.trim().toLowerCase();
       const password = authForm.password;
-      //const role = authForm.role;
+      const role = authForm.role;
 
       if (authMode === 'register' && authForm.role === 'merchant') {
 
@@ -189,6 +189,9 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
             throw insertError;
           }
           
+          localStorage.setItem("currentUserEmail", authForm.email);
+          localStorage.setItem("password", authForm.password);
+          localStorage.setItem("userRole", authForm.role);
 
           setShowAuth(false);
           setAuthMode(null);
@@ -229,6 +232,10 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           if (insertError) {
             throw insertError;
           }
+
+          localStorage.setItem("currentUserEmail", authForm.email);
+          localStorage.setItem("password", authForm.password);
+          localStorage.setItem("userRole", authForm.role);
           
 
           setShowAuth(false);
@@ -274,6 +281,9 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
             });
           }
           
+          localStorage.setItem("currentUserEmail", authForm.email);
+          localStorage.setItem("password", authForm.password);
+          localStorage.setItem("userRole", authForm.role);
 
           setShowAuth(false);
           setAuthMode(null);
@@ -335,6 +345,9 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
 
       }
 
+      localStorage.setItem("currentUserEmail", authForm.email);
+      localStorage.setItem("password", authForm.password);
+      localStorage.setItem("userRole", authForm.role);
 
     } catch (error) {
       console.error('Auth error:', error);
@@ -864,6 +877,35 @@ function Hero({ onCreateBoutique, results }) {
   );
 }
 
+function DeconnexionButton({ setIsConnected, setCurrentRole, setCurrentUserId, setAccessMessage, setSuccessMessage, setErrorMessage }) {
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setIsConnected(false);
+      setCurrentRole(null);
+      setCurrentUserId(null);
+      setAccessMessage('Vous êtes déconnecté.');
+      setSuccessMessage('');
+      setErrorMessage('');
+      navigate('/');
+
+      localStorage.removeItem("currentUserEmail");
+      localStorage.removeItem("password");
+      localStorage.removeItem("userRole");
+
+    } catch (error) {
+      console.error('Logout error:', error);
+      setErrorMessage('Erreur lors de la déconnexion: ' + error.message);
+    } 
+  };
+
+  return (
+    <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 transition">
+      Déconnexion
+    </button>
+  );
+}
 export default function GuineeMarketplaceApp() {
   
   const [search, setSearch] = useState('');
@@ -962,7 +1004,7 @@ export default function GuineeMarketplaceApp() {
         setResults([]);
       }
 
-      //(false);
+      //setLoading(false);
     };
 
     const t = setTimeout(fetchResults, 250);
@@ -992,28 +1034,35 @@ export default function GuineeMarketplaceApp() {
 
   useEffect(() => {
     const restoreSession = async () => {
+
+
       const { data } = await supabase.auth.getSession();
       const session = data?.session;
 
-      console.log('Restoring session:', session?.user?.id);
+      const savedUser = localStorage.getItem("currentUserEmail");
+      const savedRole = localStorage.getItem("userRole");
 
-      if (session?.user) {
+      const CurrentUser = await findProfileByEmailAndRole(savedUser, savedRole);
+
+      console.log('Restoring session:', CurrentUser?.id);
+
+      if (CurrentUser) {
         setIsConnected(true);
         setAuthForm((prev) => ({
           ...prev,
-          email: session.user.email || prev.email,
-          fullName: session.user.user_metadata?.full_name || prev.fullName,
+          email: CurrentUser.email || prev.email,
+          fullName: CurrentUser.full_name || prev.fullName,
         }));
-        setCurrentUserId(session.user.id);
+        setCurrentUserId(CurrentUser.id);
 
         // derive role from session metadata first (avoids RLS read issues), fallback to profile lookup
-        const metaRole = session.user.user_metadata?.role;
+        const metaRole = CurrentUser?.role;
         if (metaRole) {
           setCurrentRole(metaRole);
           setAuthForm((prev) => ({ ...prev, role: metaRole }));
         } else {
           try {
-            const { profile, role } = await findProfileById(session.user.id);
+            const { profile, role } = await findProfileById(CurrentUser.id);
             console.log('Profile found:', profile?.id, 'role:', role);
             if (role || profile?.role) {
               setCurrentRole(role || profile.role);
@@ -1034,58 +1083,7 @@ export default function GuineeMarketplaceApp() {
 
     restoreSession();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
-        setIsConnected(false);
-        setCurrentRole(null);
-        setCurrentUserId(null);
-        setShowMerchantSetup(false);
-      }
-
-      if (session?.user) {
-        console.log('=== AUTH STATE CHANGE (not logout) ===');
-        console.log('Event:', event);
-        console.log('Session user ID:', session.user.id);
-        
-        setIsConnected(true);
-        setAuthForm((prev) => ({
-          ...prev,
-          email: session.user.email || prev.email,
-          fullName: session.user.user_metadata?.full_name || prev.fullName,
-        }));
-
-        // update role when auth state changes - prefer metadata then fallback to profile lookup
-        (async () => {
-          try {
-            const metaRole = session.user.user_metadata?.role;
-            if (metaRole) {
-              setCurrentRole(metaRole);
-              setAuthForm((prev) => ({ ...prev, role: metaRole }));
-              setCurrentUserId(session.user.id);
-              console.log('Set role from metadata:', metaRole);
-              return;
-            }
-
-            const { profile, role } = await findProfileById(session.user.id);
-            if (role || profile?.role) {
-              setCurrentRole(role || profile.role);
-              setAuthForm((prev) => ({ ...prev, fullName: profile?.full_name || prev.fullName, role: role || profile.role }));
-              console.log('Found profile, setting currentUserId to profile ID:', profile.id);
-              setCurrentUserId(profile.id);
-            } else {
-              console.warn('No profile found for auth user:', session.user.id);
-            }
-          } catch (e) {
-            console.error('Error loading profile on auth change', e);
-          }
-        })();
-      }
-    });
-
-    return () => {
-      authListener?.subscription?.unsubscribe();
-    };
-  }, []);
+    }, []);
 
   return (
     <Router>

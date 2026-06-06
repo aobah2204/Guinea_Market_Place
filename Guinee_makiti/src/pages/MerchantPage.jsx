@@ -138,18 +138,21 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
       if (photoForm.file) {
         const file = photoForm.file;
         const filePath = `business_photos/${photoForm.business_id}/${Date.now()}_${file.name}`;
+        {/*}
         const { data, error: uploadError } = await supabase.storage.from('business_photos').upload(filePath, file, {
           cacheControl: '3600',
           upsert: false,
         });
+        */}
+        const { data, error: uploadError } = await supabase.from('business_photos').insert([{ photo_url: filePath, business_id: photoForm.business_id }]);
         if (uploadError) {
           throw new Error('Erreur de téléchargement du fichier : ' + uploadError.message);
         }
-        const { data: publicData, error: publicError } = supabase.storage.from('business_photos').getPublicUrl(data.path);
+        const { data: publicData, error: publicError } = supabase.from('business_photos').select('photo_url').eq('photo_url', data.photo_url);
         if (publicError) {
           throw new Error('Impossible de récupérer l\'URL publique : ' + publicError.message);
         }
-        photoUrl = publicData.publicUrl;
+        photoUrl = publicData[0].photo_url;
       }
 
       if (!photoUrl) {
