@@ -821,7 +821,7 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
   );
 }
 
-function Hero({ onCreateBoutique, results }) {
+function Hero({ onCreateBoutique, results, featuredShops }) {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
       {/* Grille responsive */}
@@ -832,29 +832,61 @@ function Hero({ onCreateBoutique, results }) {
             <span className="text-green-700">Guinée Connect</span>
           </h2>
           <p className="text-base sm:text-lg text-gray-700 mb-6 sm:mb-8">
-            Une super app nationale permettant <br/>
-              &nbsp;&nbsp;&nbsp;&nbsp;- aux commerçants, restaurants, services, hôpitaux et loisirs de créer leur présence digitale, <br/>
-              &nbsp;&nbsp;&nbsp;&nbsp;- aux utilisateurs de trouver en toute facilité ce qui leur convient.
+            Une super app nationale permettant <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;- aux commerçants, restaurants, services, hôpitaux et loisirs de créer leur présence digitale, <br />
+            &nbsp;&nbsp;&nbsp;&nbsp;- aux utilisateurs de trouver en toute facilité ce qui leur convient.
           </p>
-          {/*
-          <div className="flex flex-wrap gap-4">
-            <button onClick={onCreateBoutique} className="bg-green-600 text-white px-6 py-3 rounded-2xl text-lg">Créer ma boutique</button>
-            <button className="border border-green-600 text-green-700 px-6 py-3 rounded-2xl text-lg">Télécharger l'app</button>
-          </div>
-          */}
+          <button onClick={onCreateBoutique} className="bg-green-600 text-white px-6 py-3 rounded-2xl text-lg font-semibold hover:bg-green-700 transition">
+            Créer ma boutique
+          </button>
         </div>
-        
+
         {/* Image */}
         <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 border">
           <div className="aspect-video rounded-2xl bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 flex flex-col items-center justify-center text-white">
             <img
               src="https://png.pngtree.com/png-clipart/20230802/original/pngtree-guinea-round-button-clip-art-black-shiny-vector-picture-image_9332151.png"
               alt="Guinée Connect"
-              className="w-34 sm:w-32 lg:w-40 h-34 sm:h-32 lg:h-40 object-contain rounded-full shadow-md"
-            />           
+              className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-full shadow-md"
+            />
           </div>
         </div>
       </div>
+
+      {featuredShops?.length > 0 && (
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">Boutiques / Services / Lieux en ligne</h3>
+              <p className="text-sm text-gray-500">Faites défiler pour découvrir la première photo de chacune.</p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto pb-3">
+            <div className="flex gap-4 min-w-max">
+              {featuredShops.map((shop) => (
+                <div key={shop.id} className="min-w-[220px] max-w-[220px] bg-white border rounded-3xl shadow-sm overflow-hidden flex-shrink-0">
+                  <div className="h-40 bg-gray-100 overflow-hidden">
+                    {shop.first_photo_url ? (
+                      <img src={shop.first_photo_url} alt={shop.business_name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center bg-slate-100 text-sm text-gray-500">
+                        Aucune photo
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <div className="font-semibold text-sm text-gray-900 mb-1 truncate">{shop.business_name}</div>
+                    <div className="text-xs text-gray-500 truncate">{shop.category || 'Categorie'}</div>
+                    <div className="text-xs text-gray-500 mt-1 truncate">{shop.city || shop.address}</div>
+                    <div className="text-xs text-gray-500 mt-2 truncate">{shop.description}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Résultats - fullwidth 
       <div className="relative">
@@ -875,8 +907,7 @@ function Hero({ onCreateBoutique, results }) {
         )}
       </div>
       */}
-
-
+      
     </section>
   );
 }
@@ -935,6 +966,7 @@ export default function GuineeMarketplaceApp() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [cityFilter, setCityFilter] = useState('');
   const [results, setResults] = useState([]);
+  const [featuredShops, setFeaturedShops] = useState([]);
 
   const [currentUser, setCurrentUser] = useState({
     id: 0,
@@ -1027,6 +1059,54 @@ export default function GuineeMarketplaceApp() {
     const t = setTimeout(fetchResults, 250);
     return () => clearTimeout(t);
   }, [query, categoryFilter, cityFilter]);
+
+  useEffect(() => {
+    const loadFeaturedShops = async () => {
+      try {
+        const { data: shops, error: shopError } = await supabase
+          .from('businesses')
+          .select('id, business_name, category, city, address, description')
+          .order('created_at', { ascending: false })
+          .limit(12);
+
+        if (shopError) {
+          console.error('Error loading featured shops', shopError);
+          return;
+        }
+
+        const shopIds = (shops || []).map((shop) => shop.id);
+        if (!shopIds.length) {
+          setFeaturedShops([]);
+          return;
+        }
+
+        const { data: photos, error: photoError } = await supabase
+          .from('business_photos')
+          .select('business_id, photo_url')
+          .in('business_id', shopIds)
+          .order('id', { ascending: true })
+          .limit(50);
+
+        if (photoError) {
+          console.error('Error loading shop photos', photoError);
+        }
+
+        const firstPhotos = (photos || []).reduce((acc, photo) => {
+          if (!acc[photo.business_id]) acc[photo.business_id] = photo.photo_url;
+          return acc;
+        }, {});
+
+        setFeaturedShops((shops || []).map((shop) => ({
+          ...shop,
+          first_photo_url: firstPhotos[shop.id] || null,
+        })));
+      } catch (loadError) {
+        console.error('Unable to load featured shops', loadError);
+      }
+    };
+
+    loadFeaturedShops();
+  }, []);
 
   function ProtectedRoute({ allowedRole, children }) {
     if (isLoadingSession) {
@@ -1220,7 +1300,7 @@ export default function GuineeMarketplaceApp() {
                   <ClientPage setAccessMessage={setAccessMessage} setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} />
                 ) 
               ) : (
-                <Hero onCreateBoutique={() => setShowMerchantSetup(true)} results={results} query={query} />
+                <Hero onCreateBoutique={() => setShowMerchantSetup(true)} results={results} featuredShops={featuredShops} query={query} />
               )
             }
           />
