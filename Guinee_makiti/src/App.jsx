@@ -836,9 +836,11 @@ function Hero({ onCreateBoutique, results, featuredShops }) {
             &nbsp;&nbsp;&nbsp;&nbsp;- aux commerçants, restaurants, services, hôpitaux et loisirs de créer leur présence digitale, <br />
             &nbsp;&nbsp;&nbsp;&nbsp;- aux utilisateurs de trouver en toute facilité ce qui leur convient.
           </p>
+          {/*
           <button onClick={onCreateBoutique} className="bg-green-600 text-white px-6 py-3 rounded-2xl text-lg font-semibold hover:bg-green-700 transition">
             Créer ma boutique
           </button>
+          */}
         </div>
 
         {/* Image */}
@@ -907,7 +909,7 @@ function Hero({ onCreateBoutique, results, featuredShops }) {
         )}
       </div>
       */}
-      
+
     </section>
   );
 }
