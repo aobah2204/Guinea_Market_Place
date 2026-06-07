@@ -829,10 +829,12 @@ function Hero({ onCreateBoutique, results }) {
         {/* Texte */}
         <div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 sm:mb-6">
-            Digitalisez toute la <span className="text-green-700">Guinée</span>
+            <span className="text-green-700">Guinée Connect</span>
           </h2>
           <p className="text-base sm:text-lg text-gray-700 mb-6 sm:mb-8">
-            Une super app nationale permettant aux commerçants, restaurants, services, hôpitaux et loisirs de créer leur présence digitale.
+            Une super app nationale permettant <br/>
+              &nbsp;&nbsp;&nbsp;&nbsp;- aux commerçants, restaurants, services, hôpitaux et loisirs de créer leur présence digitale, <br/>
+              &nbsp;&nbsp;&nbsp;&nbsp;- aux utilisateurs de trouver en toute facilité ce qui leur convient.
           </p>
           {/*
           <div className="flex flex-wrap gap-4">
@@ -848,7 +850,7 @@ function Hero({ onCreateBoutique, results }) {
             <img
               src="https://png.pngtree.com/png-clipart/20230802/original/pngtree-guinea-round-button-clip-art-black-shiny-vector-picture-image_9332151.png"
               alt="Guinée Connect"
-              className="w-24 sm:w-32 lg:w-40 h-24 sm:h-32 lg:h-40 object-contain rounded-full shadow-md"
+              className="w-34 sm:w-32 lg:w-40 h-34 sm:h-32 lg:h-40 object-contain rounded-full shadow-md"
             />           
           </div>
         </div>
