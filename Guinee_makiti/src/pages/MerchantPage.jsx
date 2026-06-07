@@ -332,7 +332,7 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
                     {photoModeOpen === b.id && (
                       <form onSubmit={submitPhoto} className="mt-4 space-y-3 border p-4 rounded bg-slate-50">
                         <div className="text-xs sm:text-sm text-gray-700">Chargez un fichier ou collez un lien d'image</div>
-                        {/*<input type="url" name="url" placeholder="URL de l'image" value={photoForm.url} onChange={handlePhotoFormChange} className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" /> */}
+                        <input type="url" name="url" placeholder="URL de l'image" value={photoForm.url} onChange={handlePhotoFormChange} className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
                         <input type="file" name="file" accept="image/*" onChange={handlePhotoFormChange} className="w-full text-sm font-bold bg-gray-600 text-white px-3 py-2 rounded" />
                         <div className="flex gap-2">
                           <button type="submit" className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-green-700 transition">Ajouter</button>
