@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { FaPhone, FaWhatsapp } from 'react-icons/fa';
 import supabase from '../lib/supabaseClient';
 
 function formatDistance(meters) {
@@ -137,6 +138,9 @@ export default function ShopPage({ setAccessMessage, setErrorMessage }) {
 
   const mapQuery = shop ? encodeURIComponent(`${shop.business_name} ${shop.address || ''} ${shop.city || ''}`.trim()) : '';
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
+  const whatsappNumber = shop?.whatsapp ? shop.whatsapp.replace(/[^0-9+]/g, '') : '';
+  const whatsappLink = whatsappNumber ? `https://wa.me/${whatsappNumber.replace(/^\+/, '')}` : '';
+  const telLink = shop?.phone ? `tel:${shop.phone.replace(/[^0-9+]/g, '')}` : '';
 
   const hasCoordinates = shop?.latitude && shop?.longitude && userLocation;
   const distance = hasCoordinates
@@ -178,10 +182,52 @@ export default function ShopPage({ setAccessMessage, setErrorMessage }) {
                 <div className="rounded-3xl border p-4 bg-slate-50">
                   <div className="text-xs uppercase tracking-wide text-gray-500">Téléphone</div>
                   <div className="mt-2 text-base text-gray-800">{shop.phone || 'Non renseigné'}</div>
+                  <div className="mt-4 flex flex-col gap-2">
+                    <a
+                      href={telLink}
+                      className={`inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold text-white transition ${shop.phone ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-300 cursor-not-allowed opacity-60'}`}
+                      aria-disabled={!shop.phone}
+                    >
+                      <FaPhone className="mr-2" />
+                      Appeler
+                    </a>
+                    {/* WhatsApp peut être affiché même si le numéro n'est pas renseigné, mais le lien sera désactivé */}
+                    <a
+                      href={telLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold text-white transition ${telLink ? 'bg-sky-600 hover:bg-sky-700' : 'bg-gray-300 cursor-not-allowed opacity-60'}`}
+                      aria-disabled={!telLink}
+                    >
+                      <FaWhatsapp className="mr-2" />
+                      Envoyer un message
+                    </a>
+                    
+                  </div>
                 </div>
                 <div className="rounded-3xl border p-4 bg-slate-50">
                   <div className="text-xs uppercase tracking-wide text-gray-500">WhatsApp</div>
                   <div className="mt-2 text-base text-gray-800">{shop.whatsapp || 'Non renseigné'}</div>
+                  <div className="mt-4 flex flex-col gap-2">                    
+                    <a
+                      href={telLink}
+                      className={`inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold text-white transition ${shop.phone ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-300 cursor-not-allowed opacity-60'}`}
+                      aria-disabled={!shop.phone}
+                    >
+                      <FaPhone className="mr-2" />
+                      Appeler
+                    </a>
+                    <a
+                      href={whatsappLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold text-white transition ${whatsappLink ? 'bg-sky-600 hover:bg-sky-700' : 'bg-gray-300 cursor-not-allowed opacity-60'}`}
+                      aria-disabled={!whatsappLink}
+                    >
+                      <FaWhatsapp className="mr-2" />
+                      Envoyer un message
+                    </a>
+                  </div>
                 </div>
               </div>
 
