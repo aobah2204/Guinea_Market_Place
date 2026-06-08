@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
   useNavigate,
+  Link,
   HashRouter,
 } from 'react-router-dom';
 
@@ -13,6 +14,7 @@ import {
 import supabase from './lib/supabaseClient';
 import ClientPage from './pages/ClientPage';
 import MerchantPage from './pages/MerchantPage';
+import ShopPage from './pages/ShopPage';
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -867,7 +869,11 @@ function Hero({ onCreateBoutique, results, featuredShops }) {
           <div className="overflow-x-auto pb-3">
             <div className="flex gap-4 min-w-max">
               {featuredShops.map((shop) => (
-                <div key={shop.id} className="min-w-[220px] max-w-[220px] bg-white border rounded-3xl shadow-sm overflow-hidden flex-shrink-0">
+                <Link
+                  key={shop.id}
+                  to={`/shop/${shop.id}`}
+                  className="min-w-[220px] max-w-[220px] bg-white border rounded-3xl shadow-sm overflow-hidden flex-shrink-0 cursor-pointer transition hover:-translate-y-0.5"
+                >
                   <div className="h-40 bg-gray-100 overflow-hidden">
                     {shop.first_photo_url ? (
                       <img src={shop.first_photo_url} alt={shop.business_name} className="h-full w-full object-cover" />
@@ -883,7 +889,7 @@ function Hero({ onCreateBoutique, results, featuredShops }) {
                     <div className="text-xs text-gray-500 mt-1 truncate">{shop.city || shop.address}</div>
                     <div className="text-xs text-gray-500 mt-2 truncate">{shop.description}</div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -1133,33 +1139,53 @@ export default function GuineeMarketplaceApp() {
 
   useEffect(() => {
     const restoreSession = async () => {
+      try {
+        console.info("Restoration session ...");
 
-      console.info("Restoration session ...");
+        const { data } = await supabase.auth.getSession();
+        const session = data?.session;
 
-      const { data } = await supabase.auth.getSession();
-      const session = data?.session;
+        if (!session) {
+          console.log('No session found');
+          setIsLoadingSession(false);
+          return;
+        }
 
-      const savedUser = localStorage.getItem("currentUserEmail");
-      const savedRole = localStorage.getItem("userRole");
+        const savedUser = localStorage.getItem("currentUserEmail");
+        const savedRole = localStorage.getItem("userRole");
+        const sessionEmail = session.user?.email;
 
-      const { profile: CurrentUser} = await findProfileByEmailAndRole(savedUser, savedRole);
+        let profileResult = null;
+        if (savedUser && savedRole) {
+          profileResult = await findProfileByEmailAndRole(savedUser, savedRole);
+        }
 
-      console.log('Restoring session:', CurrentUser?.id);
+        if (!profileResult?.profile && sessionEmail) {
+          profileResult = await findProfileByEmail(sessionEmail);
+        }
 
-      if (CurrentUser) {
+        const CurrentUser = profileResult?.profile;
+        const resolvedRole = profileResult?.role;
+
+        console.log('Restoring session:', CurrentUser?.id, 'role:', resolvedRole);
+
+        if (!CurrentUser) {
+          console.log('No profile found for session user');
+          setIsLoadingSession(false);
+          return;
+        }
+
         setIsConnected(true);
         setAuthForm((prev) => ({
           ...prev,
           email: CurrentUser.email || prev.email,
           fullName: CurrentUser.full_name || prev.fullName,
+          role: resolvedRole || prev.role,
         }));
         setCurrentUserId(CurrentUser.id);
 
-        // derive role from session metadata first (avoids RLS read issues), fallback to profile lookup
-        const metaRole = CurrentUser?.role;
-        if (metaRole) {
-          setCurrentRole(metaRole);
-          setAuthForm((prev) => ({ ...prev, role: metaRole }));
+        if (resolvedRole) {
+          setCurrentRole(resolvedRole);
         } else {
           try {
             const { profile, role } = await findProfileById(CurrentUser.id);
@@ -1174,16 +1200,18 @@ export default function GuineeMarketplaceApp() {
             console.error('Error loading profile on restore', e);
           }
         }
+
         setShowAuth(false);
-      } else {
-        console.log('No session found');
+      } catch (e) {
+        console.error('Session restoration failed', e);
+      } finally {
+        setIsLoadingSession(false);
       }
-      setIsLoadingSession(false);
     };
 
     restoreSession();
 
-    }, []);
+  }, []);
 
   return (
     <Router>
@@ -1283,6 +1311,10 @@ export default function GuineeMarketplaceApp() {
           <Route
             path="/merchant"
             element={<ProtectedRoute allowedRole="merchant">{showMerchantSetup ? <MerchantSetupSection setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} setShowMerchantSetup={setShowMerchantSetup} currentUserId={currentUserId} /> : <MerchantPage onCreateBoutique={() => setShowMerchantSetup(true)} currentUserId={currentUserId} setAccessMessage={setAccessMessage} setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} />}</ProtectedRoute>}
+          />
+          <Route
+            path="/shop/:shopId"
+            element={<ShopPage setAccessMessage={setAccessMessage} setErrorMessage={setErrorMessage} />}
           />
           <Route
             path="/"

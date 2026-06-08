@@ -337,7 +337,7 @@ export default function MerchantPage({ user, onCreateBoutique, currentUserId: pr
                         <div className="flex gap-2">
                           <button type="submit" className="flex-1 bg-green-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-green-700 transition">Ajouter</button>
                           <button type="button" onClick={() => setPhotoModeOpen(null)} className="flex-1 border px-3 py-2 rounded text-sm hover:bg-gray-100 transition">Annuler</button>
-                        </div>
+                        </div> 
                         {/*<div className="text-xs text-gray-500">Si votre bucket de stockage Supabase n'est pas configuré, ajoutez un lien d'image externe.</div> */}
                       </form>
                     )}

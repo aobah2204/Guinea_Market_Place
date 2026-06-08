@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import supabase from '../lib/supabaseClient';
 
 export default function ClientPage({ setAccessMessage, setSuccessMessage, setErrorMessage }) {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [businessPhotos, setBusinessPhotos] = useState({});
@@ -191,7 +193,14 @@ export default function ClientPage({ setAccessMessage, setSuccessMessage, setErr
         {results.length > 0 ? (
           <ul className="w-full bg-white border rounded-lg shadow-lg overflow-hidden">
             {results.map((r) => (
-              <li key={r.id} className="p-4 sm:p-5 hover:bg-gray-50 border-b transition text-sm sm:text-base">
+              <li
+              key={r.id}
+              onClick={() => navigate(`/shop/${r.id}`)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate(`/shop/${r.id}`)}
+              className="p-4 sm:p-5 hover:bg-gray-50 border-b transition text-sm sm:text-base cursor-pointer"
+            >
                 <div className="font-semibold text-base sm:text-lg">{r.business_name}</div>
                 <div className="text-xs sm:text-sm font-normal text-gray-500">Catégorie: {r.category}</div>
                 <div className="text-xs sm:text-sm text-gray-600 mt-1">{r.city} — {r.address}</div>
