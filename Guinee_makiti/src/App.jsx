@@ -1145,29 +1145,13 @@ export default function GuineeMarketplaceApp() {
         const { data } = await supabase.auth.getSession();
         const session = data?.session;
 
-        if (!session) {
-          console.log('No session found');
-          setIsLoadingSession(false);
-          return;
-        }
-
         const savedUser = localStorage.getItem("currentUserEmail");
         const savedRole = localStorage.getItem("userRole");
-        const sessionEmail = session.user?.email;
 
-        let profileResult = null;
-        if (savedUser && savedRole) {
-          profileResult = await findProfileByEmailAndRole(savedUser, savedRole);
-        }
+        const { profile: CurrentUser} = await findProfileByEmailAndRole(savedUser, savedRole);
 
-        if (!profileResult?.profile && sessionEmail) {
-          profileResult = await findProfileByEmail(sessionEmail);
-        }
 
-        const CurrentUser = profileResult?.profile;
-        const resolvedRole = profileResult?.role;
-
-        console.log('Restoring session:', CurrentUser?.id, 'role:', resolvedRole);
+        console.log('Restoring session:', CurrentUser?.id, 'role:', savedRole);
 
         if (!CurrentUser) {
           console.log('No profile found for session user');
@@ -1180,12 +1164,12 @@ export default function GuineeMarketplaceApp() {
           ...prev,
           email: CurrentUser.email || prev.email,
           fullName: CurrentUser.full_name || prev.fullName,
-          role: resolvedRole || prev.role,
+          role: savedRole || prev.role,
         }));
         setCurrentUserId(CurrentUser.id);
 
-        if (resolvedRole) {
-          setCurrentRole(resolvedRole);
+        if (savedRole) {
+          setCurrentRole(savedRole);
         } else {
           try {
             const { profile, role } = await findProfileById(CurrentUser.id);
