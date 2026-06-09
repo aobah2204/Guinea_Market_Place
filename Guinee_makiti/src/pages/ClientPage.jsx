@@ -191,7 +191,7 @@ export default function ClientPage({ setAccessMessage, setSuccessMessage, setErr
       {/* Résultats - responsive */}
       <div className="relative">
         {results.length > 0 ? (
-          <ul className="w-full bg-white border rounded-lg shadow-lg overflow-hidden">
+          <ul className="w-full bg-blue-200 border rounded-lg shadow-lg overflow-hidden">
             {results.map((r) => (
               <li
               key={r.id}

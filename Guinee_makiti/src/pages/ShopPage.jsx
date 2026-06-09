@@ -172,7 +172,7 @@ export default function ShopPage({ setAccessMessage, setErrorMessage }) {
         <div className="space-y-6">
           
           {photos.length > 0 && (
-            <div className="rounded-3xl border bg-white p-6 shadow-sm">
+            <div className="rounded-3xl border bg-green-200 p-6 shadow-sm">
               <div className="mb-4">
                 <div className="text-sm text-gray-500">{shop.category || 'Sans catégorie'}</div>
                 <h3 className="text-3xl font-semibold text-gray-900 mt-2">{shop.business_name}</h3>
@@ -190,7 +190,7 @@ export default function ShopPage({ setAccessMessage, setErrorMessage }) {
           )}
           
           <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
-            <div className="rounded-3xl border bg-white p-6 shadow-sm">
+            <div className="rounded-3xl border bg-blue-200 p-6 shadow-sm">
               <div className="mb-4">
                 {/* <div className="text-sm text-gray-500">{shop.category || 'Sans catégorie'}</div> */}
                 <h3 className="text-3xl font-semibold text-gray-900 mt-2">Contact</h3>
