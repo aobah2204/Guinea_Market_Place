@@ -170,12 +170,31 @@ export default function ShopPage({ setAccessMessage, setErrorMessage }) {
         <div className="rounded-3xl border bg-white p-8 text-center text-gray-700">Boutique introuvable.</div>
       ) : (
         <div className="space-y-6">
-          <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
+          
+          {photos.length > 0 && (
             <div className="rounded-3xl border bg-white p-6 shadow-sm">
               <div className="mb-4">
                 <div className="text-sm text-gray-500">{shop.category || 'Sans catégorie'}</div>
                 <h3 className="text-3xl font-semibold text-gray-900 mt-2">{shop.business_name}</h3>
                 <p className="text-sm text-gray-500 mt-2">{shop.city || 'Ville inconnue'} · {shop.address || 'Adresse inconnue'}</p>
+              </div>
+
+              <div className="text-sm uppercase tracking-wide text-gray-500 mb-4">Galerie de la boutique</div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {photos.map((photo) => (
+                  <img key={photo.photo_url} src={photo.photo_url} alt={`Photo boutique ${shop.business_name}`} className="h-44 w-full rounded-3xl object-cover" />
+                ))}
+              </div>
+            </div>
+              
+          )}
+          
+          <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
+            <div className="rounded-3xl border bg-white p-6 shadow-sm">
+              <div className="mb-4">
+                {/* <div className="text-sm text-gray-500">{shop.category || 'Sans catégorie'}</div> */}
+                <h3 className="text-3xl font-semibold text-gray-900 mt-2">Contact</h3>
+                <p className="text-sm text-gray-500 mt-2">{shop.category || 'Sans catégorie'} - {shop.city || 'Ville inconnue'} · {shop.address || 'Adresse inconnue'}</p>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -270,17 +289,7 @@ export default function ShopPage({ setAccessMessage, setErrorMessage }) {
               </div>
             </div>
           </div>
-
-          {photos.length > 0 && (
-            <div className="rounded-3xl border bg-white p-6 shadow-sm">
-              <div className="text-sm uppercase tracking-wide text-gray-500 mb-4">Galerie de la boutique</div>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {photos.map((photo) => (
-                  <img key={photo.photo_url} src={photo.photo_url} alt={`Photo boutique ${shop.business_name}`} className="h-44 w-full rounded-3xl object-cover" />
-                ))}
-              </div>
-            </div>
-          )}
+          
         </div>
       )}
     </section>
