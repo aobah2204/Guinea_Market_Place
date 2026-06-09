@@ -1131,10 +1131,83 @@ function AppContent() {
         </section>
         */}
 
+      {/* Contact Section */}
+      <section className="bg-green-200 text-white py-16 px-4 sm:px-8 mt-16">       
+        
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10">
+          
+                   
+          <div>
+            <h2 className="text-3xl font-bold mb-4 text-black">Contact & Prise de contact</h2>
+            <p className="mb-6 text-black">
+              Une question sur les publications, les inscriptions ou autre ?
+              Envoyez-nous directement votre message.
+            </p>
+
+            <form
+              action="mailto:aobah34@gmail.com"
+              method="POST"
+              encType="text/plain"
+              className="space-y-4"
+            >
+              <input
+                type="text"
+                name="Nom"
+                placeholder="Votre nom"
+                className="bg-gray-300 w-full p-3 rounded-lg text-black"
+                required
+              />
+
+              <input
+                type="email"
+                name="Email"
+                placeholder="Votre email"
+                className="bg-gray-300 w-full p-3 rounded-lg text-black"
+                required
+              />
+
+              <textarea
+                name="Message"
+                placeholder="Votre message"
+                rows={5}
+                className="bg-gray-300 w-full p-3 rounded-lg text-black"
+                required
+              />
+
+              <button
+                type="submit"
+                className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-3 rounded-lg w-full"
+              >
+                Envoyer le message
+              </button>
+            </form>
+          </div>
+          
+
+          <div className="flex flex-col justify-center">
+            <h3 className="text-2xl font-semibold mb-4 text-black">Réjoignez nous sur</h3>
+            <div className="flex gap-5 flex-wrap items-center text-lg">
+              
+              <a href="https://instagram.com" target="_blank" rel="noreferrer">
+                <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram" className="w-10 h-10 hover:scale-110 transition" />
+              </a>
+              
+              <a href="https://t.me" target="_blank" rel="noreferrer">
+                <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram" className="w-10 h-10 hover:scale-110 transition" />
+              </a>
+              <a href="https://wa.me/0000000000" target="_blank" rel="noreferrer">
+                <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" className="w-10 h-10 hover:scale-110 transition" />
+              </a>
+              
+            </div>            
+          </div>
+        </div>
+      </section>
+
       </div>
 
-      <footer className="bg-green-700 text-white py-6 mt-12">
-          <div className="max-w-7xl mx-auto px-6 text-center">
+      <footer className="bg-green-700 text-white py-6 mt-12">        
+          <div className="max-w-7xl mx-auto px-6 text-center">            
             &copy; {new Date().getFullYear()} Guinée Connect. Tous droits réservés.
           </div>
       </footer>
