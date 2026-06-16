@@ -142,6 +142,22 @@ export default function ClientPage({ setAccessMessage, setSuccessMessage, setErr
   return (   
 
     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+
+      <div className="rounded-3xl border hero mb-6">
+        <div>
+          <h2 className="text-3xl sm:text-4xl lg:text-3xl font-extrabold leading-tight mb-4 sm:mb-6 text-black-500 bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 bg-clip-text text-transparent">
+            Trouvez. <br/>
+            Découvrez. <br/>
+          </h2>
+
+          <p className="text-lg sm:text-xl text-white mb-6 sm:mb-8">
+            Toute la Guinée connectée à vous.
+            Trouvez facilement les commerces,
+            les lieux de loisirs et les hôpitaux.
+          </p>
+        </div>
+      </div>
+
       <h2 className="text-2xl sm:text-3xl font-bold mb-6">Recherche de boutiques et lieux</h2>
 
       {/* Filtres - responsive grid */}
