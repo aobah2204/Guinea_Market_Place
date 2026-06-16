@@ -147,8 +147,36 @@ export default function ShopPage({ setAccessMessage, setErrorMessage }) {
     ? formatDistance(getDistance(userLocation.latitude, userLocation.longitude, shop.latitude, shop.longitude))
     : null;
 
+  const handleScrollToContact = () => {
+    const el = document.getElementById('contact-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      {photos.length > 0 && (
+        <div
+          className="rounded-3xl mb-6 overflow-hidden relative h-64 w-full bg-cover bg-center shadow-sm"
+          style={{ backgroundImage: `url(${photos[0].photo_url})` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+          <div className="absolute left-6 bottom-6 flex gap-3">
+            <button
+              onClick={handleScrollToContact}
+              className="px-4 py-2 rounded-2xl bg-white/90 text-sm font-semibold text-gray-900 hover:bg-white transition"
+            >
+              Contacter
+            </button>
+            <a
+              href={googleMapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="px-4 py-2 rounded-2xl bg-green-600 text-sm font-semibold text-white hover:bg-green-700 transition"
+            >
+              Localiser
+            </a>
+          </div>
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold">Détails de la boutique</h2>
@@ -190,7 +218,7 @@ export default function ShopPage({ setAccessMessage, setErrorMessage }) {
           )}
           
           <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
-            <div className="rounded-3xl border bg-blue-200 p-6 shadow-sm">
+            <div id="contact-section" className="rounded-3xl border bg-blue-200 p-6 shadow-sm">
               <div className="mb-4">
                 {/* <div className="text-sm text-gray-500">{shop.category || 'Sans catégorie'}</div> */}
                 <h3 className="text-3xl font-semibold text-gray-900 mt-2">Contact</h3>
