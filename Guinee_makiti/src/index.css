@@ -1,1 +1,292 @@
 @import "tailwindcss";
+
+
+/* HEADER 
+
+header{
+
+    background:white;
+    padding:25px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 5px 20px #0001;
+}
+*/
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+
+.logo-icon{
+
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:
+    linear-gradient(135deg,#d71920,#f4b400,#00843d);
+
+}
+
+
+.logo h1{
+
+font-size:32px;
+
+}
+
+.logo span{
+color:#00843d;
+}
+
+
+nav a{
+
+text-decoration:none;
+margin-left:25px;
+color:#102030;
+font-weight:bold;
+
+}
+
+
+/* HERO */
+
+.hero{
+
+
+align-items:center;
+
+background-image: url("./assets/CHATGPT-guinee.png");
+height: 500px;
+
+
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+
+}
+
+
+.hero h2{
+
+font-size:55px;
+line-height:1.1;
+
+}
+
+
+.hero h2 span{
+
+color:#00843d;
+
+}
+
+
+.hero p{
+
+margin:25px 0;
+font-size:20px;
+
+}
+
+
+.search{
+
+background:white;
+padding:15px;
+border-radius:50px;
+display:flex;
+box-shadow:0 10px 30px #0002;
+
+}
+
+
+.search input{
+
+flex:1;
+border:0;
+outline:0;
+font-size:18px;
+
+}
+
+
+.search button{
+
+background:#00843d;
+color:white;
+border:0;
+padding:15px 30px;
+border-radius:30px;
+
+}
+
+
+/* PHONE MOCKUP */
+
+.phone{
+
+background:#111;
+padding:15px;
+border-radius:40px;
+/*transform:rotate(-8deg);*/
+box-shadow:0 30px 50px #0004;
+
+}
+
+
+.screen{
+
+background:white;
+height:550px;
+border-radius:30px;
+padding:25px;
+
+
+}
+
+
+.map{
+
+height:420px;
+
+background-size: cover;        /* adapte l'image à toute la zone */
+background-position: center;   /* centre l'image */
+background-repeat: no-repeat;  /* évite la répétition */
+
+background-image: url("./assets/Conakry.png");
+border-radius:20px;
+margin-top:20px;
+position:relative;
+
+overflow:hidden; /* garde les coins arrondis */
+
+}
+
+
+.pin{
+
+position:absolute;
+width:50px;
+height:50px;
+border-radius:50%;
+top:20%;
+left:50%;
+
+}
+
+
+/* SERVICES */
+
+
+.services{
+
+padding:40px 8%;
+
+}
+
+
+.cards{
+
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:25px;
+
+}
+
+
+.card{
+
+padding:35px;
+border-radius:25px;
+color:white;
+min-height:200px;
+box-shadow:0 20px 30px #0002;
+
+}
+
+
+.green{background:#00843d;}
+.orange{background:#f4a300;}
+.blue{background:#1261a0;}
+
+
+
+.card h3{
+
+font-size:28px;
+margin-bottom:15px;
+
+}
+
+
+
+/* ENTREPRENEURS */
+
+.business{
+
+margin:50px 8%;
+background:#005b2b;
+color:white;
+padding:45px;
+border-radius:30px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+}
+
+
+.business button{
+
+background:#f4b400;
+border:0;
+padding:18px 35px;
+border-radius:30px;
+font-weight:bold;
+
+}
+
+
+/* FOOTER */
+
+
+footer{
+
+background:#061827;
+color:white;
+padding:30px 8%;
+display:flex;
+justify-content:space-between;
+
+}
+
+
+@media(max-width:800px){
+
+.hero{
+grid-template-columns:1fr;
+}
+
+.cards{
+grid-template-columns:1fr;
+}
+
+header,footer,.business{
+
+flex-direction:column;
+gap:20px;
+
+}
+
+.hero h2{
+
+font-size:38px;
+
+}
+
+}

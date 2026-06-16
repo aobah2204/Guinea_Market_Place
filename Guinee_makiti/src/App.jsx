@@ -560,10 +560,14 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
 
 function Hero({ onCreateBoutique, results, featuredShops }) {
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-8 sm:space-y-12">
+
+      
+
       {/* Grille responsive */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center mb-8 bg-blue-100 p-6 rounded-3xl border">
-        {/* Texte */}
+      <div className="rounded-3xl border hero">
+        {/* Texte 
         <div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 sm:mb-6">
             <span className="text-green-700">Guinée Connect</span>
@@ -573,14 +577,10 @@ function Hero({ onCreateBoutique, results, featuredShops }) {
             &nbsp;&nbsp;&nbsp;&nbsp;- aux commerçants, restaurants, services, hôpitaux et loisirs de créer leur présence digitale, <br />
             &nbsp;&nbsp;&nbsp;&nbsp;- aux utilisateurs de trouver en toute facilité ce qui leur convient.
           </p>
-          {/*
-          <button onClick={onCreateBoutique} className="bg-green-600 text-white px-6 py-3 rounded-2xl text-lg font-semibold hover:bg-green-700 transition">
-            Créer ma boutique
-          </button>
-          */}
+          
         </div>
 
-        {/* Image */}
+        {/* Image 
         <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 border">
           <div className="aspect-video rounded-2xl bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 flex flex-col items-center justify-center text-white">
             
@@ -592,10 +592,116 @@ function Hero({ onCreateBoutique, results, featuredShops }) {
             
           </div>
         </div>
+          */}
+        {/* Slogan */}
+        <div>
+
+          <h2 className="text-3xl sm:text-4xl lg:text-3xl font-extrabold leading-tight mb-4 sm:mb-6 text-black-500 bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 bg-clip-text text-transparent">
+              Trouvez. <br/>
+              Découvrez. <br/>
+          </h2> 
+
+          <p className="text-lg sm:text-xl text-white mb-6 sm:mb-8">
+            Toute la Guinée connectée à vous.
+            Trouvez facilement les commerces,
+            les lieux de loisirs et les hôpitaux.
+          </p>
+
+          {/* Barre de recherche 
+          <div class="search">
+
+            <input placeholder="Que recherchez-vous ?"/>
+
+            <button>
+            Rechercher
+            </button>
+
+          </div>    
+          */}     
+
+        </div>        
+          
       </div>
+
+      <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 border phone">
+
+
+            <div class="screen">
+
+
+                <h2>
+                Guinée Connect
+                </h2>
+
+
+                <div class="map">
+
+                <div class="pin">📍</div>
+
+                </div>
+
+
+                <h3>
+                  Autour de vous
+                </h3>
+
+
+                <p>
+                📍 Conakry, Guinée
+                </p>
+
+
+              </div>
+
+
+        </div>
 
       {featuredShops?.length > 0 && (
         <div className="mb-10">
+
+            <div>
+              <h2>
+                Nos services
+              </h2>
+
+              <div class="cards">
+
+                <div class="card green">
+
+                  <h3>
+                  🛒 Commerces
+                  </h3>
+
+                  <p>
+                  Découvrez les boutiques
+                  et services proches de vous.
+                  </p>
+                </div>
+
+                <div class="card orange">
+                  <h3>
+                  ⚽ Loisirs
+                  </h3>
+
+                  <p>
+                  Restaurants, activités,
+                  sorties et découvertes.
+                  </p>
+                </div>
+
+                <div class="card blue">
+
+                  <h3>🏥 Hôpitaux</h3>
+                  <p>
+                    Trouvez rapidement
+                    les centres de santé.
+                  </p>
+                </div>
+              </div>
+              </div>
+            <div>
+          </div>
+
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">Boutiques / Services / Lieux en ligne</h3>
@@ -1131,7 +1237,7 @@ function AppContent() {
         </section>
         */}
 
-      {/* Contact Section */}
+      {/* Contact Section 
       <section className="bg-green-200 text-white py-16 px-4 sm:px-8 mt-16">       
         
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10">
@@ -1203,6 +1309,8 @@ function AppContent() {
           </div>
         </div>
       </section>
+      */}
+
 
       </div>
 
