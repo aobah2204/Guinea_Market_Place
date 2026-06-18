@@ -9,7 +9,7 @@ import {
   Link,
   HashRouter,
 } from 'react-router-dom';
-
+import { Analytics, track } from "@vercel/analytics/react";
 
 
 import supabase from './lib/supabaseClient';
@@ -803,6 +803,11 @@ export default function GuineeMarketplaceApp() {
 function AppContent() {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
+  useEffect(() => {
+    track('route_change', {
+      path: location.pathname,
+    });
+  }, [location.pathname]);
 
   const [search, setSearch] = useState('');
   const [authMode, setAuthMode] = useState(null);
@@ -1219,6 +1224,7 @@ function AppContent() {
             }
           />
         </Routes>
+        <Analytics />
 
         
         {/*
