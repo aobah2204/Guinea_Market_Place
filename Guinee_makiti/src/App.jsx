@@ -209,6 +209,12 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           setCurrentRole(authForm.role);
           setCurrentUserId(userId);
           setSuccessMessage('Création compte réussie.');
+
+          track("Signup", {
+            role: authForm.role,
+            email: authForm.email,
+          });
+
           navigate(authForm.role === 'merchant' ? '/merchant' : '/client');
           return;
       }
@@ -254,6 +260,12 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           setCurrentRole(authForm.role);
           setCurrentUserId(userId);
           setSuccessMessage('Création compte réussie.');
+
+          track("Signup", {
+            role: authForm.role,
+            email: authForm.email,
+          });
+
           navigate(authForm.role === 'merchant' ? '/merchant' : '/client');
           return;
 
@@ -301,7 +313,13 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           setCurrentRole(authForm.role);
           if (currentRoleProfile?.id) setCurrentUserId(currentRoleProfile.id);
           setSuccessMessage('Connexion réussie.');
-          navigate(authForm.role === 'merchant' ? '/merchant' : '/client');
+
+          track("Login", {
+            role: authForm.role,
+            email: authForm.email,
+          });
+
+          navigate(authForm.role === 'merchant' ? '/merchant' : '/client');         
 
       }
       
@@ -346,6 +364,12 @@ function AuthSection({ authMode, setAuthMode, authForm, setAuthForm, setShowAuth
           //setCurrentUserId(user.id);
           if (currentRoleProfile?.id) setCurrentUserId(currentRoleProfile.id);
           setSuccessMessage('Connexion réussie.');
+
+          track("Login", {
+            role: authForm.role,
+            email: authForm.email,
+          });
+
           navigate(authForm.role === 'merchant' ? '/merchant' : '/client');
 
       }
@@ -775,6 +799,11 @@ function DeconnexionButton({ setIsConnected, setCurrentRole, setCurrentUserId, s
       setSuccessMessage('');
       setErrorMessage('');
       navigate('/');
+
+      track("Logout", {
+            role: currentUser.role,
+            email: currentUser.email,
+          });
 
       localStorage.removeItem("currentUserEmail");
       localStorage.removeItem("password");
