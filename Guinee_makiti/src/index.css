@@ -52,18 +52,24 @@ font-weight:bold;
 
 }
 
+/* body
+.body{
+
+background-image: url("./assets/CHATGPT-guinee.png");
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+
+}
+ */
 
 /* HERO */
 
 .hero{
 
-
 align-items:center;
-
-background-image: url("./assets/CHATGPT-guinee.png");
+background-image: url("./assets/ConakryNight.jpg");
 height: 500px;
-
-
 background-size: cover;
 background-position: center;
 background-repeat: no-repeat;
@@ -146,7 +152,6 @@ height:550px;
 border-radius:30px;
 padding:25px;
 
-
 }
 
 
@@ -157,7 +162,6 @@ height:420px;
 background-size: cover;        /* adapte l'image à toute la zone */
 background-position: center;   /* centre l'image */
 background-repeat: no-repeat;  /* évite la répétition */
-
 background-image: url("./assets/Conakry.png");
 border-radius:20px;
 margin-top:20px;

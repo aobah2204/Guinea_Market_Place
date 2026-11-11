@@ -17,6 +17,7 @@ import ClientPage from './pages/ClientPage';
 import MerchantPage from './pages/MerchantPage';
 import ShopPage from './pages/ShopPage';
 import { v4 as uuidv4 } from 'uuid';
+import { RiLogoutCircleFill  } from 'react-icons/ri';
 
 
 class FormData {
@@ -101,8 +102,21 @@ function Header({ query, setQuery, search, setSearch, setAuthMode, setShowAuth, 
           </button>
           <div>
             <h1 className="text-lg sm:text-2xl text-green-700 font-extrabold">Guinée Connect</h1>
-            <p className="text-xs sm:text-sm text-gray-600">Marketplace + découverte locale</p>
+            <p className="text-xs sm:text-sm text-gray-600">Trouvez facilement ce qu'il vous faut en Guinée</p>
           </div>
+
+          <div className="ml-auto min-w-0 flex items-center justify-end gap-2 sm:gap-3">
+            <div className="truncate font-semibold text-sm sm:text-base">Bienvenue {authForm.fullName}</div>                
+            <button
+              onClick={async () => { await supabase.auth.signOut(); setIsConnected(false); setCurrentRole(null); setCurrentUserId(null); setShowMerchantSetup(false); }}
+              aria-label="Déconnexion"
+              title="Déconnexion"
+              className="shrink-0 rounded-full bg-red-600 p-2 text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+            >
+              <RiLogoutCircleFill className="text-xl" />
+            </button>
+          </div>
+          
         </div>
         
         {/* Barre de recherche 
@@ -122,10 +136,15 @@ function Header({ query, setQuery, search, setSearch, setAuthMode, setShowAuth, 
         <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mt-4 sm:mt-0">
           {isConnected ? (
             
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
-              <div className="font-semibold text-sm sm:text-base">Bienvenue {authForm.fullName}</div>
-              <button onClick={async () => { await supabase.auth.signOut(); setIsConnected(false); setCurrentRole(null); setCurrentUserId(null); setShowMerchantSetup(false); }} className="bg-red-600 text-white px-3 sm:px-4 py-2 rounded-2xl text-sm sm:text-base w-full sm:w-auto">Déconnexion</button>
             
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+
+              {/*
+              <div className="font-semibold text-sm sm:text-base">Bienvenue {authForm.fullName}</div>
+              
+              <button onClick={async () => { await supabase.auth.signOut(); setIsConnected(false); setCurrentRole(null); setCurrentUserId(null); setShowMerchantSetup(false); }} className="bg-red-600 text-white px-3 sm:px-4 py-2 rounded-2xl text-sm sm:text-base w-full sm:w-auto">Déconnexion</button>
+             
+
               <div className="flex gap-2 mb-4 sm:mb-0">
                 <input
                   type="text"
@@ -136,8 +155,9 @@ function Header({ query, setQuery, search, setSearch, setAuthMode, setShowAuth, 
                 />
                 <button className="bg-green-600 text-white px-3 sm:px-5 py-2 rounded-2xl text-sm sm:text-base font-medium whitespace-nowrap">Rechercher</button>
               </div>
+              */}
             </div>
-
+            
             
           ) : (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">              
