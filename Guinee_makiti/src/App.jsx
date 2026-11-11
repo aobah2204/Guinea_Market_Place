@@ -6,7 +6,6 @@ import {
   Navigate,
   useNavigate,
   useLocation,
-  Link,
   HashRouter,
 } from 'react-router-dom';
 import { Analytics, track } from "@vercel/analytics/react";
@@ -16,6 +15,7 @@ import supabase from './lib/supabaseClient';
 import ClientPage from './pages/ClientPage';
 import MerchantPage from './pages/MerchantPage';
 import ShopPage from './pages/ShopPage';
+import FeaturedBusinesses from './components/FeaturedBusinesses';
 import { v4 as uuidv4 } from 'uuid';
 import { RiLogoutCircleFill  } from 'react-icons/ri';
 
@@ -569,7 +569,7 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
       <div className="bg-white rounded-3xl shadow-2xl border p-6 sm:p-8">
         <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4 sm:mb-6 text-green-700">Créer ma boutique</h2>
         <p className="text-center text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base">
-          Félicitations, votre compte commerçant est créé. Configurez maintenant votre boutique.
+          Configurez votre boutique.
         </p>
         <form onSubmit={handleShopSubmit} className="space-y-3 sm:space-y-4 max-w-2xl mx-auto">
           <input name="business_name" value={shopForm.business_name} onChange={handleShopChange} type="text" placeholder="Nom de la boutique" className="w-full border rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-500" />
@@ -602,12 +602,14 @@ function MerchantSetupSection({ setSuccessMessage, setErrorMessage, setShowMerch
   );
 }
 
-function Hero({ onCreateBoutique, results, featuredShops }) {
+function Hero({ onCreateBoutique, results }) {
   return (
     
     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-8 sm:space-y-12">
 
       
+
+          <FeaturedBusinesses />
 
       {/* Grille responsive */}
       <div className="rounded-3xl border hero">
@@ -638,32 +640,22 @@ function Hero({ onCreateBoutique, results, featuredShops }) {
         </div>
           */}
         {/* Slogan */}
+
+        <div className="rounded-3xl border hero mb-6">
         <div>
-
           <h2 className="text-3xl sm:text-4xl lg:text-3xl font-extrabold leading-tight mb-4 sm:mb-6 text-black-500 bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 bg-clip-text text-transparent">
-              Trouvez. <br/>
-              Découvrez. <br/>
-          </h2> 
+            Cherchez. <br/>
+            Trouvez. <br/>
+            Découvrez. <br/>
+            Soyez emmerveillé(e). <br/>
+          </h2>
 
-          <p className="text-lg sm:text-xl text-white mb-6 sm:mb-8">
+          <p className="text-2xl sm:text-2xl lg:text-3xl font-extrabold leading-tight text-black-500 bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 bg-clip-text text-transparent">
             Toute la Guinée connectée à vous.
-            Trouvez facilement les commerces,
-            les lieux de loisirs et les hôpitaux.
+            Trouvez facilement les hôpitaux, les lieux de cultes, les écoles, les marchées, les commerces, les lieux de loisirs, de détentes ou bien d'autres choses ...
           </p>
-
-          {/* Barre de recherche 
-          <div class="search">
-
-            <input placeholder="Que recherchez-vous ?"/>
-
-            <button>
-            Rechercher
-            </button>
-
-          </div>    
-          */}     
-
-        </div>        
+        </div>
+      </div>
           
       </div>
 
@@ -700,8 +692,7 @@ function Hero({ onCreateBoutique, results, featuredShops }) {
 
         </div>
 
-      {featuredShops?.length > 0 && (
-        <div className="mb-10">
+      <div className="mb-10">
 
             <div>
               <h2>
@@ -746,42 +737,7 @@ function Hero({ onCreateBoutique, results, featuredShops }) {
             <div>
           </div>
 
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">Boutiques / Services / Lieux en ligne</h3>
-              <p className="text-sm text-gray-500">Faites défiler pour découvrir la première photo de chacune.</p>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto pb-3">
-            <div className="flex gap-4 min-w-max">
-              {featuredShops.map((shop) => (
-                <Link
-                  key={shop.id}
-                  to={`/shop/${shop.id}`}
-                  className="min-w-[220px] max-w-[220px] bg-white border rounded-3xl shadow-sm overflow-hidden flex-shrink-0 cursor-pointer transition hover:-translate-y-0.5"
-                >
-                  <div className="h-40 bg-gray-100 overflow-hidden">
-                    {shop.first_photo_url ? (
-                      <img src={shop.first_photo_url} alt={shop.business_name} className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center bg-slate-100 text-sm text-gray-500">
-                        Aucune photo
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <div className="font-semibold text-sm text-gray-900 mb-1 truncate">{shop.business_name}</div>
-                    <div className="text-xs text-gray-500 truncate">{shop.category || 'Categorie'}</div>
-                    <div className="text-xs text-gray-500 mt-1 truncate">{shop.city || shop.address}</div>
-                    <div className="text-xs text-gray-500 mt-2 truncate">{shop.description}</div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* Résultats - fullwidth 
       <div className="relative">
@@ -881,7 +837,6 @@ function AppContent() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [cityFilter, setCityFilter] = useState('');
   const [results, setResults] = useState([]);
-  const [featuredShops, setFeaturedShops] = useState([]);
 
   const [currentUser, setCurrentUser] = useState({
     id: 0,
@@ -1001,54 +956,6 @@ function AppContent() {
     const t = setTimeout(fetchResults, 250);
     return () => clearTimeout(t);
   }, [query, categoryFilter, cityFilter]);
-
-  useEffect(() => {
-    const loadFeaturedShops = async () => {
-      try {
-        const { data: shops, error: shopError } = await supabase
-          .from('businesses')
-          .select('id, business_name, category, city, address, description')
-          .order('created_at', { ascending: false })
-          .limit(12);
-
-        if (shopError) {
-          console.error('Error loading featured shops', shopError);
-          return;
-        }
-
-        const shopIds = (shops || []).map((shop) => shop.id);
-        if (!shopIds.length) {
-          setFeaturedShops([]);
-          return;
-        }
-
-        const { data: photos, error: photoError } = await supabase
-          .from('business_photos')
-          .select('business_id, photo_url')
-          .in('business_id', shopIds)
-          .order('id', { ascending: true })
-          .limit(50);
-
-        if (photoError) {
-          console.error('Error loading shop photos', photoError);
-        }
-
-        const firstPhotos = (photos || []).reduce((acc, photo) => {
-          if (!acc[photo.business_id]) acc[photo.business_id] = photo.photo_url;
-          return acc;
-        }, {});
-
-        setFeaturedShops((shops || []).map((shop) => ({
-          ...shop,
-          first_photo_url: firstPhotos[shop.id] || null,
-        })));
-      } catch (loadError) {
-        console.error('Unable to load featured shops', loadError);
-      }
-    };
-
-    loadFeaturedShops();
-  }, []);
 
   function ProtectedRoute({ allowedRole, children }) {
     if (isLoadingSession) {
@@ -1268,7 +1175,7 @@ function AppContent() {
                   <ClientPage setAccessMessage={setAccessMessage} setSuccessMessage={setSuccessMessage} setErrorMessage={setErrorMessage} />
                 ) 
               ) : (
-                <Hero onCreateBoutique={() => setShowMerchantSetup(true)} results={results} featuredShops={featuredShops} query={query} />
+                <Hero onCreateBoutique={() => setShowMerchantSetup(true)} results={results} query={query} />
               )
             }
           />

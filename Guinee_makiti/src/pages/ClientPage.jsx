@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../lib/supabaseClient';
+import FeaturedBusinesses from '../components/FeaturedBusinesses';
 
 export default function ClientPage({ setAccessMessage, setSuccessMessage, setErrorMessage }) {
   const navigate = useNavigate();
@@ -154,11 +155,12 @@ export default function ClientPage({ setAccessMessage, setSuccessMessage, setErr
 
           <p className="text-2xl sm:text-2xl lg:text-3xl font-extrabold leading-tight text-black-500 bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 bg-clip-text text-transparent">
             Toute la Guinée connectée à vous.
-            Trouvez facilement les commerces,
-            les lieux de loisirs et les hôpitaux.
+            Trouvez facilement les hôpitaux, les lieux de cultes, les écoles, les marchées, les commerces, les lieux de loisirs, de détentes ou bien d'autres choses ...
           </p>
         </div>
       </div>
+
+      <FeaturedBusinesses />
 
       <h2 className="text-2xl sm:text-3xl font-bold mb-6">Recherche de boutiques et lieux</h2>
 
